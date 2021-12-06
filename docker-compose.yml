@@ -9,4 +9,4 @@ services:
         env_file:
             - .env
         ports:
-            - "8080:8140"
+            - "8140:8080"
