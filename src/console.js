@@ -42,6 +42,8 @@ global.consoleConfig = {
 for (const func in global.consoleConfig) {
     const real = console[func]
     console[func] = async (...args) => { // A proxy
-        real(`${colors.Reset}[ ${new Date().toTimeString().split(" ")[0]} ]${colors[global.consoleConfig[func].color] ?? ""}`, global.consoleConfig[func].prefix ?? "", ...args, colors.Reset)
+        real(
+            `${colors.Reset}[ ${new Date().toTimeString().split(" ")[0]} ]${colors[global.consoleConfig[func].color] ?? ""}`, global.consoleConfig[func].prefix ?? "", ...args, colors.Reset
+        )
     }
 }

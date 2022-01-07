@@ -22,7 +22,9 @@ async function incrementMessageCount(id) {
             template.count = 0
         } else template.count = (typeof server.count === "number" ? server.count : 0) + 1
     }
-    await schemas.MessageCountModel.findOneAndUpdate({ id }, template, { upsert: true })
+    await schemas.MessageCountModel.findOneAndUpdate(
+        { id }, template, { upsert: true }
+    )
 }
 
 /**
@@ -41,7 +43,9 @@ async function getMessageCount(id) {
         // The count exists
         if (server.date !== new Date().toDateString()) {
             template.count = 0
-            await schemas.MessageCountModel.findOneAndUpdate({ id }, template, { upsert: true })
+            await schemas.MessageCountModel.findOneAndUpdate(
+                { id }, template, { upsert: true }
+            )
         }
     }
     return server?.count
@@ -53,7 +57,9 @@ async function getMessageCount(id) {
  * @param {string} serverId Server id
  * @param {string} userId user id
  */
-async function updateDataCollectionPolicy(mode, serverId, userId) {
+async function updateDataCollectionPolicy(
+    mode, serverId, userId
+) {
     const config = await schemas.DataCollectionConfigurationModel.findOne({ id: serverId })
     if (config !== null) {
         if (mode === "remove") config.allowed.splice(config.allowed.indexOf(userId), 1)
@@ -75,7 +81,9 @@ async function getDataCollectionConfig(id) {
  * @param {string} bio The user bio
  * @param {string} connectedAccounts Connected accounts
  */
-async function setUserInfo(id, bio, connectedAccounts) {
+async function setUserInfo(
+    id, bio, connectedAccounts
+) {
     const template = {
         id,
         bio,
@@ -84,7 +92,9 @@ async function setUserInfo(id, bio, connectedAccounts) {
     const initial = await schemas.UserInfoModel.findOne({ id }).exec()
     if (template.bio === undefined) template.bio = initial?.bio
     if (template.connectedAccounts === undefined) template.connectedAccounts = initial?.connectedAccounts
-    return schemas.UserInfoModel.findOneAndUpdate({ id }, template, { upsert: true }).exec()
+    return schemas.UserInfoModel.findOneAndUpdate(
+        { id }, template, { upsert: true }
+    ).exec()
 }
 
 /**

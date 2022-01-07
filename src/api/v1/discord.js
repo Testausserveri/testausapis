@@ -123,7 +123,9 @@ module.exports = (database) => {
                     // Handle profile management commands
                     if (interaction.options.getSubcommand() === "bio") {
                         await interaction.deferReply({ ephemeral: true })
-                        await database.setUserInfo(interaction.user.id, interaction.options.get("text").value, undefined)
+                        await database.setUserInfo(
+                            interaction.user.id, interaction.options.get("text").value, undefined
+                        )
                         await interaction.followUp({
                             content: "Profile bio set!",
                             ephemeral: true
