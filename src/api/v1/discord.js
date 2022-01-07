@@ -61,7 +61,7 @@ class DiscordUtility {
                     id: member.user.id,
                     presence: member.presence ? member.presence.activities.map((activity) => ({
                         type: activity.type,
-                        id: activity.id,
+                        id: activity.applicationId,
                         emoji: activity.emoji ? ({
                             animated: activity.emoji.animated,
                             name: activity.emoji.name,
