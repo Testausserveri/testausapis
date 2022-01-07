@@ -13,7 +13,7 @@ services:
         links:
             - testausapis_mongo
     testausapis_mongo:
-        container_name: mongo
+        container_name: testausapis_mongo
         image: mongo
         volumes:
         - ./data:/data/db
