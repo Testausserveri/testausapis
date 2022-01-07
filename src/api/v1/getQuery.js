@@ -4,15 +4,12 @@
  * @param {url} url The URL string
  * @returns {string}
  */
-module.exports = function getQuery(key, url){
-    if(!url) throw "Missing URL from getQuery"
-    if(url.includes(key + "=")){
+module.exports = function getQuery(key, url) {
+    if (url.includes(`${key}=`)) {
         try {
-            let value = url.split(key + "=")[1]
-            if(value.includes("&")) value = value.split("&")[0]
-            return decodeURIComponent(value)
-        }
-        catch(e){
+            const urlConstruct = new URL(url)
+            return urlConstruct.searchParams.get(key)
+        } catch (e) {
             return false
         }
     }

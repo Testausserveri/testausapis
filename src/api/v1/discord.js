@@ -24,6 +24,7 @@ class DiscordUtility {
      * @param {String} id The server id
      * @returns {Promise<String|null>}
      */
+    // eslint-disable-next-line class-methods-use-this
     async getMemberCount(id) {
         return (await client.guilds.fetch(id))?.memberCount
     }
@@ -137,8 +138,7 @@ module.exports = (database) => {
                         await interaction.reply({ content: "Authorize access to your account by logging in with your Discord account.", components: [row], ephemeral: true })
                     }
                 }
-            }
-            catch(e) {
+            } catch (e) {
                 console.error("Failed to process application command", e)
                 if (interaction.replied) {
                     interaction.followUp({

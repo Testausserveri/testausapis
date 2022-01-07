@@ -23,7 +23,6 @@ async function incrementMessageCount(id) {
         } else template.count = (typeof server.count === "number" ? server.count : 0) + 1
     }
     await schemas.MessageCountModel.findOneAndUpdate({ id }, template, { upsert: true })
-    return
 }
 
 /**
