@@ -53,6 +53,17 @@ module.exports = async (
         return res.json(role)
     }
 
+    if (req.method === "GET" && req.path === "/v1/discord/memberInfo") {
+        console.debug("request...")
+        if (!req.query.role) return res.status(400).send("Please specify a role id (as role) in the query.")
+        const role = await discordUtility.getRoleData(mainServer, req.query.role)
+        console.debug(role)
+        const config = await database.getDataCollectionConfig(mainServer)
+        role.members = role.members.filter(member => config.allowed.includes(member.id))
+        if (role === null) return res.status(401).send("Private role data.")
+        return res.json(role)
+    }
+
     // Discord authorization
     if (req.method === "GET" && req.path === "/v1/discord/connections/authorize") {
         return res.redirect(`https://discord.com/api/oauth2/authorize?client_id=917512133535748126&response_type=code&scope=identify%20connections&redirect_uri=${discordCallback}`)
