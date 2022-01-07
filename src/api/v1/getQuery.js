@@ -9,7 +9,6 @@ module.exports = function getQuery(key, url) {
         // eslint-disable-next-line no-param-reassign
         if (url.startsWith("/")) url = `http://local${url}`
         const urlConstruct = new URL(url)
-        console.debug(urlConstruct.searchParams)
         return urlConstruct.searchParams.get(key)
     } catch (e) {
         return false
