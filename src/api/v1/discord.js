@@ -3,7 +3,6 @@ const {
 } = require("discord.js")
 
 const discordConnectionsURL = "http://localhost:8080/v1/discord/connections/authorize"
-const rolesWhitelistedForDataExport = ["743950610080071801", "839072621060423771"]
 
 const intents = new Intents()
 intents.add(
@@ -35,8 +34,8 @@ class DiscordUtility {
      * @param {String} roleId The role id
      */
     async getRoleData(serverId, roleId) {
-        if (!rolesWhitelistedForDataExport.includes(roleId)) return null
         const role = await (await client.guilds.fetch(serverId)).roles.fetch(roleId)
+        if (role === null) return null
         // Fetch members and build response
         // eslint-disable-next-line no-restricted-syntax
         for await (const member of role.members) await member[1].user.fetch() // Fetch all members

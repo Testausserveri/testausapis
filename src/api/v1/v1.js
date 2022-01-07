@@ -6,6 +6,7 @@ const { Request, Response, NextFunction } = require("express")
 const mainServer = "697710787636101202"
 const discordCallback = "https://api.testausserveri.fi/v1/discord/connections/authorized"
 const githubCallback = "https://api.testausserveri.fi/v1/github/authorized"
+const rolesWhitelistedForDataExport = ["743950610080071801"]
 
 // Internal dependencies
 const database = require("./database")
@@ -47,14 +48,13 @@ module.exports = async (
 
     // MemberInfo
     if (req.method === "GET" && req.path === "/v1/discord/roleInfo") {
+        if (!rolesWhitelistedForDataExport.includes(req.query.id)) return res.status(401).send("Private role data.")
         if (!req.query.id) return res.status(400).send("Please specify a role id in the query.")
         const role = await discordUtility.getRoleData(mainServer, req.query.id)
-        if (role === null) return res.status(401).send("Private role data.")
         return res.json(role)
     }
 
     if (req.method === "GET" && req.path === "/v1/discord/memberInfo") {
-        console.debug("request...")
         if (!req.query.role) return res.status(400).send("Please specify a role id (as role) in the query.")
         const role = await discordUtility.getRoleData(mainServer, req.query.role)
         const config = await database.getDataCollectionConfig(mainServer)
