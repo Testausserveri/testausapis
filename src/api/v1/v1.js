@@ -57,6 +57,7 @@ module.exports = async (
     if (req.method === "GET" && req.path === "/v1/discord/memberInfo") {
         if (!req.query.role) return res.status(400).send("Please specify a role id (as role) in the query.")
         const role = await discordUtility.getRoleData(mainServer, req.query.role)
+        if (role === null) return res.status(404).send("No such role.")
         const config = await database.getDataCollectionConfig(mainServer)
         role.members = role.members.filter((member) => config.allowed.includes(member.id))
         if (role === null) return res.status(401).send("Private role data.")
