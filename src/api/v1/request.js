@@ -12,6 +12,7 @@ const protocols = {
  * Make a simple HTTPS request
  * @param {string} method The request method
  * @param {string} url The request url
+ * @param {Record<string, unknown>} headers The request headers
  * @param {string} body The request body
  * @returns {RequestResponse}
  */
