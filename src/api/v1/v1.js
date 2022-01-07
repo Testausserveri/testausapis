@@ -1,0 +1,166 @@
+// Packages
+// eslint-disable-next-line no-unused-vars
+const { Request, Response, NextFunction } = require("express")
+
+// Configuration
+const mainServer = "697710787636101202"
+const discordCallback = "https://api.testausserveri.fi/v1/discord/connections/authorized"
+const githubCallback = "https://api.testausserveri.fi/v1/github/authorized"
+
+// Internal dependencies
+const database = require("./database")
+const discord = require("./discord")
+const request = require("./request")
+const getQuery = require("./getQuery")
+
+let discordUtility // The Discord utility class
+
+// Initialize the Discord client & Database
+database.init().then(() => {
+    discordUtility = discord(database)
+    console.log("Connected to the database!")
+}).catch((e) => {
+    console.error("Failed to connect to the database", e)
+})
+
+/**
+ * V1 API Handler
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ */
+module.exports = async (
+    req, res, next
+) => {
+    // Verify that we are ready to serve data
+    if (discordUtility === undefined) return res.status(503).send("Service is getting ready...")
+
+    // GuildInfo
+    if (req.method === "GET" && req.path === "/v1/discord/guildInfo") {
+        const messagesToday = await database.getMessageCount(mainServer)
+        const memberCount = await discordUtility.getMemberCount(mainServer)
+        return res.json({
+            memberCount: memberCount ?? "N/A",
+            messagesToday: messagesToday ?? "N/A"
+        })
+    }
+
+    // MemberInfo
+    if (req.method === "GET" && req.path === "/v1/discord/roleInfo") {
+        if (!req.query.id) return res.status(400).send("Please specify a role id in the query.")
+        const role = await discordUtility.getRoleData(mainServer, req.query.id)
+        if (role === null) return res.status(401).send("Private role data.")
+        return res.json(role)
+    }
+
+    // Discord authorization
+    if (req.method === "GET" && req.path === "/v1/discord/connections/authorize") {
+        return res.redirect(`https://discord.com/api/oauth2/authorize?client_id=917512133535748126&response_type=code&scope=identify%20connections&redirect_uri=${discordCallback}`)
+    }
+
+    if (req.method === "GET" && req.path === "/v1/discord/connections/authorized") {
+        // Authorization consent screen & auth code
+        const code = getQuery("code", req.url)
+        if (!code) return res.status(400).send("Missing code from request query.")
+        // Get token
+        const params = new URLSearchParams()
+        params.append("client_id", "917512133535748126")
+        params.append("client_secret", process.env.DISCORD_SECRET)
+        params.append("grant_type", "authorization_code")
+        params.append("code", code)
+        params.append("redirect_uri", discordCallback)
+        const tokenExchange = await request(
+            "POST", "https://discord.com/api/v8/oauth2/token", {
+                "Content-Type": "application/x-www-form-urlencoded"
+            }, params.toString()
+        )
+        if (tokenExchange.status === 200) {
+            const token = JSON.parse(tokenExchange.data).access_token
+            const info = await request(
+                "GET", "https://discord.com/api/v9/oauth2/@me", {
+                    Authorization: `Bearer ${token}`
+                }
+            )
+            if (info.status === 200) {
+                const { user } = JSON.parse(info.data)
+                const connections = await request(
+                    "GET", "https://discord.com/api/v8/users/@me/connections", {
+                        Authorization: `Bearer ${token}`
+                    }
+                )
+                if (connections.status === 200) {
+                    // Got the profile data!
+                    const connectedAccounts = JSON.parse(connections.data).filter((account) => account.visibility === 1)
+                    await database.setUserInfo(
+                        user.id, null, connectedAccounts
+                    )
+                    res.status(200).send("Success! Profile updated.")
+                } else {
+                    res.status(401).send("Failed to get profile data.")
+                }
+            } else {
+                res.status(401).send("Failed to get user data.")
+            }
+        } else {
+            res.status(500).send("Failed to access Discord API.")
+        }
+        return ""
+    }
+
+    // Github authorization
+    if (req.method === "GET" && req.path === "/v1/github/authorize") {
+        return res.redirect(`https://github.com/login/oauth/authorize?client_id=${process.env.GH_CLIENT_ID}&redirect_uri=${githubCallback}&scope=write:org`)
+    }
+
+    // Github join callback
+    if (req.method === "GET" && req.path === "/v1/github/authorized") {
+        // Fetch the access token
+        const code = await getQuery("code", req.url)
+        if (!code) return res.status(400).send("Missing code from request query.")
+        const tokenParams = new URLSearchParams()
+        tokenParams.append("client_id", process.env.GH_CLIENT_ID)
+        tokenParams.append("client_secret", process.env.GH_CLIENT_SECRET)
+        tokenParams.append("code", code)
+        tokenParams.append("redirect_url", global.config.redirect_uri)
+        const tokenExchange = await request("POST", "https://github.com/login/oauth/access_token", {}, tokenParams.toString())
+        if (tokenExchange.status !== 200) return res.status(500).send("Failed to access Github API.")
+        const userAccessToken = new URLSearchParams(tokenExchange.data).get("access_token")
+
+        // Get user account information
+        const info = await request("GET", "https://api.github.com/user", {
+            Authorization: `token ${userAccessToken}`,
+            "User-Agent": "request"
+        })
+        if (info.status !== 200) return res.status(401).send("Failed to get user data")
+        const user = JSON.parse(info.data)
+
+        // Invite user to the organization using PAT
+        const inviteParams = new URLSearchParams()
+        inviteParams.append("invitee_id", user.id)
+        const invite = await request("POST", "https://api.github.com/orgs/Testausserveri/invitations", {
+            Authorization: `token ${process.env.GH_PAT}`,
+            "User-Agent": "request"
+        }, inviteParams.toString())
+        if (invite.status !== 200) return res.status(500).send("Failed to create invite.")
+
+        // Accept invitation on behalf of user
+        const acceptParams = new URLSearchParams()
+        acceptParams.append("accept", "application/vnd.github.v3+json")
+        acceptParams.append("state", "active")
+        const accept = await request("PATCH", "https://api.github.com/user/memberships/orgs/Testausserveri", {
+            Authorization: `token ${userAccessToken}`,
+            "User-Agent": "request"
+        }, acceptParams.toString())
+        if (accept.status !== 200) return res.status(500).send("Failed to process invite.")
+
+        // Publicize membership
+        const publicize = await request("PUT", `https://api.github.com/orgs/Testausserveri/public_members/${user.login}`, {
+            Authorization: `token ${new URLSearchParams(tokenExchange.data).get("access_token")}`,
+            "User-Agent": "request"
+        }, acceptParams.toString())
+        if (publicize.status !== 200) return res.status(500).send("Failed to make membership public. (Though your invitation was processed)")
+        return res.redirect("https://testausserveri.fi?joinedGithub")
+    }
+
+    return next()
+}

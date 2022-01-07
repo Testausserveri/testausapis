@@ -5,7 +5,7 @@
  * @returns {string}
  */
 module.exports = function getQuery(key, url){
-    if(!url) throw "Missing URL fro getQuery"
+    if(!url) throw "Missing URL from getQuery"
     if(url.includes(key + "=")){
         try {
             let value = url.split(key + "=")[1]
