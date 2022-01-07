@@ -14,7 +14,9 @@ require("./console")
 const app = express()
 
 // Webserver
-app.use((req, res, next) => { // Allow testausserveri.fi for CORS
+app.use((
+    req, res, next
+) => { // Allow testausserveri.fi for CORS
     res.setHeader("Access-Control-Allow-Origin", "*")
     next()
 })
@@ -28,13 +30,6 @@ app.get("/", (_, res) => {
         bugs: Package.bugs.url,
         homepage: Package.homepage
     })
-})
-
-app.use((
-    req, res, next
-) => { // Allow testausserveri.fi for CORS
-    res.header("Access-Control-Allow-Origin", "*")
-    next()
 })
 
 // API
