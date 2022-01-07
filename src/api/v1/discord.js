@@ -2,7 +2,7 @@ const {
     Intents, Client, MessageActionRow, MessageButton
 } = require("discord.js")
 
-const discordConnectionsURL = "http://localhost:8080/v1/discord/connections/authorize"
+const discordConnectionsURL = "http://api.testausserveri.fi:8080/v1/discord/connections/authorize"
 
 const intents = new Intents()
 intents.add(
