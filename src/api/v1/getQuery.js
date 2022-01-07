@@ -1,7 +1,7 @@
 /**
  * Get a query parameter from a URL by it's key
  * @param {string} key The query key
- * @param {url} url The URL string
+ * @param {string} url The URL string
  * @returns {string}
  */
 module.exports = function getQuery(key, url) {

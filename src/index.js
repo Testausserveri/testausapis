@@ -30,8 +30,19 @@ app.get("/", (_, res) => {
     })
 })
 
+app.use((
+    req, res, next
+) => { // Allow testausserveri.fi for CORS
+    res.header("Access-Control-Allow-Origin", "*")
+    next()
+})
+
 // API
-app.use(async (req, res, next) => v1(req, res, next))
+app.use(async (
+    req, res, next
+) => v1(
+    req, res, next
+))
 
 app.use((_, res) => {
     if (!res.headersSent) res.status(404).send("Not found.")

@@ -7,7 +7,7 @@ const schemas = require("./schemas")
 /**
  * Update a server message count
  * Does upsert if required
- * @param {String} id The server id
+ * @param {string} id The server id
  */
 async function incrementMessageCount(id) {
     const template = {
@@ -22,12 +22,14 @@ async function incrementMessageCount(id) {
             template.count = 0
         } else template.count = (typeof server.count === "number" ? server.count : 0) + 1
     }
-    await schemas.MessageCountModel.findOneAndUpdate({ id }, template, { upsert: true })
+    await schemas.MessageCountModel.findOneAndUpdate(
+        { id }, template, { upsert: true }
+    )
 }
 
 /**
  * Get server's daily message count
- * @param {String} id
+ * @param {string} id
  * @returns {Promise<null|Number>}
  */
 async function getMessageCount(id) {
@@ -41,7 +43,9 @@ async function getMessageCount(id) {
         // The count exists
         if (server.date !== new Date().toDateString()) {
             template.count = 0
-            await schemas.MessageCountModel.findOneAndUpdate({ id }, template, { upsert: true })
+            await schemas.MessageCountModel.findOneAndUpdate(
+                { id }, template, { upsert: true }
+            )
         }
     }
     return server?.count
@@ -49,11 +53,13 @@ async function getMessageCount(id) {
 
 /**
  * Update data collection policy allowed list
- * @param {"add"|"remove"} mode Add or remove from allowed list
- * @param {String} serverId Server id
- * @param {String} userId user id
+ * @param {"add" | "remove"} mode Add or remove from allowed list
+ * @param {string} serverId Server id
+ * @param {string} userId user id
  */
-async function updateDataCollectionPolicy(mode, serverId, userId) {
+async function updateDataCollectionPolicy(
+    mode, serverId, userId
+) {
     const config = await schemas.DataCollectionConfigurationModel.findOne({ id: serverId })
     if (config !== null) {
         if (mode === "remove") config.allowed.splice(config.allowed.indexOf(userId), 1)
@@ -63,7 +69,7 @@ async function updateDataCollectionPolicy(mode, serverId, userId) {
 
 /**
  * Get server's data collection config
- * @param {String} id The server Id
+ * @param {string} id The server Id
  */
 async function getDataCollectionConfig(id) {
     return schemas.DataCollectionConfigurationModel.findOne({ id }).exec()
@@ -71,11 +77,13 @@ async function getDataCollectionConfig(id) {
 
 /**
  * Update user's info in the database
- * @param {String} id User id
- * @param {String} bio The user bio
- * @param {String} connectedAccounts Connected accounts
+ * @param {string} id User id
+ * @param {string} bio The user bio
+ * @param {string} connectedAccounts Connected accounts
  */
-async function setUserInfo(id, bio, connectedAccounts) {
+async function setUserInfo(
+    id, bio, connectedAccounts
+) {
     const template = {
         id,
         bio,
@@ -84,12 +92,14 @@ async function setUserInfo(id, bio, connectedAccounts) {
     const initial = await schemas.UserInfoModel.findOne({ id }).exec()
     if (template.bio === undefined) template.bio = initial?.bio
     if (template.connectedAccounts === undefined) template.connectedAccounts = initial?.connectedAccounts
-    return schemas.UserInfoModel.findOneAndUpdate({ id }, template, { upsert: true }).exec()
+    return schemas.UserInfoModel.findOneAndUpdate(
+        { id }, template, { upsert: true }
+    ).exec()
 }
 
 /**
  * Remove user's info from the database
- * @param {String} id User id
+ * @param {string} id User id
  */
 async function removeUserInfo(id) {
     return schemas.UserInfoModel.findOneAndDelete({ id }).exec()
@@ -97,7 +107,7 @@ async function removeUserInfo(id) {
 
 /**
  * Get user's info from the database
- * @param {String} id User id
+ * @param {string} id User id
  */
 async function getUserInfo(id) {
     return schemas.UserInfoModel.findOne({ id }).exec()

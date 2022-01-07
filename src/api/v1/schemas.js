@@ -6,10 +6,12 @@ const MessageCountModel = model("MessageCount", new Schema({
     id: String,
     date: String
 }))
+
 const DataCollectionConfigurationModel = model("DataCollectionConfiguration", new Schema({
     allowed: Array,
     id: String
 }))
+
 const UserInfoModel = model("UserInfo", new Schema({
     id: String,
     bio: String,

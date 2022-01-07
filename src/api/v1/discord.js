@@ -12,6 +12,10 @@ const client = new Client({ intents })
 
 const slashCommands = require("./slashCommands")
 
+/**
+ * @typedef {import("./database")} Database
+ */
+
 class DiscordUtility {
     constructor(database) {
         this.database = database
@@ -20,8 +24,8 @@ class DiscordUtility {
 
     /**
      * Get the member count of a Discord server
-     * @param {String} id The server id
-     * @returns {Promise<String|null>}
+     * @param {string} id The server id
+     * @returns {Promise<string | null>}
      */
     // eslint-disable-next-line class-methods-use-this
     async getMemberCount(id) {
@@ -30,8 +34,8 @@ class DiscordUtility {
 
     /**
      * Get relevant analytics data for a specific role
-     * @param {String} serverId The server id
-     * @param {String} roleId The role id
+     * @param {string} serverId The server id
+     * @param {string} roleId The role id
      */
     async getRoleData(serverId, roleId) {
         const role = await (await client.guilds.fetch(serverId)).roles.fetch(roleId)
@@ -87,10 +91,6 @@ class DiscordUtility {
     }
 }
 
-// TODO: Intellisense is broken...
-/**
- * @typedef {{incrementMessageCount, updateDataCollectionPolicy, getDataCollectionConfig, setUserInfo, removeUserInfo, getUserInfo}} Database
- */
 /**
  * Initialize the Discord client
  * @param {Database} database
@@ -123,7 +123,9 @@ module.exports = (database) => {
                     // Handle profile management commands
                     if (interaction.options.getSubcommand() === "bio") {
                         await interaction.deferReply({ ephemeral: true })
-                        await database.setUserInfo(interaction.user.id, interaction.options.get("text").value, undefined)
+                        await database.setUserInfo(
+                            interaction.user.id, interaction.options.get("text").value, undefined
+                        )
                         await interaction.followUp({
                             content: "Profile bio set!",
                             ephemeral: true

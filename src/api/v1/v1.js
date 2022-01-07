@@ -133,42 +133,52 @@ module.exports = async (
         tokenParams.append("client_secret", process.env.GH_CLIENT_SECRET)
         tokenParams.append("code", code)
         tokenParams.append("redirect_url", global.config.redirect_uri)
-        const tokenExchange = await request("POST", "https://github.com/login/oauth/access_token", {}, tokenParams.toString())
+        const tokenExchange = await request(
+            "POST", "https://github.com/login/oauth/access_token", {}, tokenParams.toString()
+        )
         if (tokenExchange.status !== 200) return res.status(500).send("Failed to access Github API.")
         const userAccessToken = new URLSearchParams(tokenExchange.data).get("access_token")
 
         // Get user account information
-        const info = await request("GET", "https://api.github.com/user", {
-            Authorization: `token ${userAccessToken}`,
-            "User-Agent": "request"
-        })
+        const info = await request(
+            "GET", "https://api.github.com/user", {
+                Authorization: `token ${userAccessToken}`,
+                "User-Agent": "request"
+            }
+        )
         if (info.status !== 200) return res.status(401).send("Failed to get user data")
         const user = JSON.parse(info.data)
 
         // Invite user to the organization using PAT
         const inviteParams = new URLSearchParams()
         inviteParams.append("invitee_id", user.id)
-        const invite = await request("POST", "https://api.github.com/orgs/Testausserveri/invitations", {
-            Authorization: `token ${process.env.GH_PAT}`,
-            "User-Agent": "request"
-        }, inviteParams.toString())
+        const invite = await request(
+            "POST", "https://api.github.com/orgs/Testausserveri/invitations", {
+                Authorization: `token ${process.env.GH_PAT}`,
+                "User-Agent": "request"
+            }, inviteParams.toString()
+        )
         if (invite.status !== 200) return res.status(500).send("Failed to create invite.")
 
         // Accept invitation on behalf of user
         const acceptParams = new URLSearchParams()
         acceptParams.append("accept", "application/vnd.github.v3+json")
         acceptParams.append("state", "active")
-        const accept = await request("PATCH", "https://api.github.com/user/memberships/orgs/Testausserveri", {
-            Authorization: `token ${userAccessToken}`,
-            "User-Agent": "request"
-        }, acceptParams.toString())
+        const accept = await request(
+            "PATCH", "https://api.github.com/user/memberships/orgs/Testausserveri", {
+                Authorization: `token ${userAccessToken}`,
+                "User-Agent": "request"
+            }, acceptParams.toString()
+        )
         if (accept.status !== 200) return res.status(500).send("Failed to process invite.")
 
         // Publicize membership
-        const publicize = await request("PUT", `https://api.github.com/orgs/Testausserveri/public_members/${user.login}`, {
-            Authorization: `token ${new URLSearchParams(tokenExchange.data).get("access_token")}`,
-            "User-Agent": "request"
-        }, acceptParams.toString())
+        const publicize = await request(
+            "PUT", `https://api.github.com/orgs/Testausserveri/public_members/${user.login}`, {
+                Authorization: `token ${new URLSearchParams(tokenExchange.data).get("access_token")}`,
+                "User-Agent": "request"
+            }, acceptParams.toString()
+        )
         if (publicize.status !== 200) return res.status(500).send("Failed to make membership public. (Though your invitation was processed)")
         return res.redirect("https://testausserveri.fi?joinedGithub")
     }
