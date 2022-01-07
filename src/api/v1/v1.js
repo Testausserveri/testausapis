@@ -132,7 +132,7 @@ module.exports = async (
         tokenParams.append("client_id", process.env.GH_CLIENT_ID)
         tokenParams.append("client_secret", process.env.GH_CLIENT_SECRET)
         tokenParams.append("code", code)
-        tokenParams.append("redirect_url", global.config.redirect_uri)
+        tokenParams.append("redirect_url", githubCallback)
         const tokenExchange = await request(
             "POST", "https://github.com/login/oauth/access_token", {}, tokenParams.toString()
         )
