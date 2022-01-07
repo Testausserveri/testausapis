@@ -14,7 +14,7 @@ require("./console")
 const app = express()
 
 // Webserver
-app.get("", (_, res) => {
+app.get("/", (_, res) => {
     res.status(200).json({
         name: Package.name,
         author: Package.author,
