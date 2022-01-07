@@ -1,7 +1,7 @@
 version: "3.9"
 
 services:
-    app:
+    testausapis:
         build:
             context: .
         image: ghcr.io/testausserveri/testausapis
@@ -11,11 +11,11 @@ services:
         ports:
             - "8140:8080"
         links:
-            - mongo
-    mongo:
+            - testausapis_mongo
+    testausapis_mongo:
         container_name: mongo
         image: mongo
         volumes:
         - ./data:/data/db
         ports:
-        - '27018:27017'
+        - '27017:27017'
