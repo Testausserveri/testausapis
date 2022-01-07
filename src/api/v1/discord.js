@@ -12,6 +12,8 @@ const client = new Client({ intents })
 
 const slashCommands = require("./slashCommands")
 
+const roleCache = {}
+
 /**
  * @typedef {import("./database")} Database
  */
@@ -40,52 +42,61 @@ class DiscordUtility {
     async getRoleData(serverId, roleId) {
         const role = await (await client.guilds.fetch(serverId)).roles.fetch(roleId)
         if (role === null) return null
-        // Fetch members and build response
-        // eslint-disable-next-line no-restricted-syntax
-        for await (const member of role.members) await member[1].user.fetch() // Fetch all members
-        const extraMemberData = {}
-        // eslint-disable-next-line no-restricted-syntax
-        for await (const member of role.members) extraMemberData[member[0]] = (await this.database.getUserInfo(member[0]))
-        const response = {
-            name: role.name,
-            id: role.id,
-            color: role.hexColor,
-            members: role.members.map((member) => ({
-                name: member.user.username,
-                displayName: member.displayName,
-                discriminator: member.user.discriminator,
-                id: member.user.id,
-                presence: member.presence ? member.presence.activities.map((activity) => ({
-                    type: activity.type,
-                    emoji: activity.emoji ? ({
-                        animated: activity.emoji.animated,
-                        name: activity.emoji.name,
-                        url: activity.emoji.url
-                    }) : null,
-                    name: activity.name,
-                    details: activity.details,
-                    state: activity.state,
-                    assets: activity.assets ? ({
-                        largeImage: activity.assets.largeImageURL(),
-                        largeImageText: activity.assets.largeText,
-                        smallImage: activity.assets.smallImageURL(),
-                        smallImageText: activity.assets.smallText
-                    }) : []
-                })) : [],
-                avatar: member.user.displayAvatarURL(),
-                banner: member.user.bannerURL(),
-                color: member.user.hexAccentColor,
-                flags: member.user.flags.toArray(),
-                connectedAccounts: extraMemberData[member.user.id]?.connectedAccounts ? extraMemberData[member.user.id]?.connectedAccounts.map((account) => ({
-                    type: account.type,
-                    name: account.name,
-                    id: account.id,
-                    visible: account.visibility === 1
-                })) : [],
-                bio: extraMemberData[member.user.id]?.bio
-            })),
-            count: role.members.size,
-            timestamp: new Date().getTime()
+        let response
+        if (!roleCache[role.id] || roleCache[role.id].expiry < new Date().getTime()) {
+            // Fetch members and build response
+            // eslint-disable-next-line no-restricted-syntax
+            for await (const member of role.members) await member[1].user.fetch() // Fetch all members
+            const extraMemberData = {}
+            // eslint-disable-next-line no-restricted-syntax
+            for await (const member of role.members) extraMemberData[member[0]] = (await this.database.getUserInfo(member[0]))
+            response = {
+                name: role.name,
+                id: role.id,
+                color: role.hexColor,
+                members: role.members.map((member) => ({
+                    name: member.user.username,
+                    displayName: member.displayName,
+                    discriminator: member.user.discriminator,
+                    id: member.user.id,
+                    presence: member.presence ? member.presence.activities.map((activity) => ({
+                        type: activity.type,
+                        emoji: activity.emoji ? ({
+                            animated: activity.emoji.animated,
+                            name: activity.emoji.name,
+                            url: activity.emoji.url
+                        }) : null,
+                        name: activity.name,
+                        details: activity.details,
+                        state: activity.state,
+                        assets: activity.assets ? ({
+                            largeImage: activity.assets.largeImageURL(),
+                            largeImageText: activity.assets.largeText,
+                            smallImage: activity.assets.smallImageURL(),
+                            smallImageText: activity.assets.smallText
+                        }) : []
+                    })) : [],
+                    avatar: member.user.displayAvatarURL(),
+                    banner: member.user.bannerURL(),
+                    color: member.user.hexAccentColor,
+                    flags: member.user.flags.toArray(),
+                    connectedAccounts: extraMemberData[member.user.id]?.connectedAccounts ? extraMemberData[member.user.id]?.connectedAccounts.map((account) => ({
+                        type: account.type,
+                        name: account.name,
+                        id: account.id,
+                        visible: account.visibility === 1
+                    })) : [],
+                    bio: extraMemberData[member.user.id]?.bio
+                })),
+                count: role.members.size,
+                timestamp: new Date().getTime()
+            }
+            roleCache[role.id] = {
+                expiry: new Date().getTime() + 5000,
+                data: response
+            }
+        } else {
+            response = roleCache[role.id].data
         }
         return response
     }
