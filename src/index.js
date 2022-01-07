@@ -26,7 +26,7 @@ app.get("/", (_, res) => {
 })
 
 app.use((req, res, next) => { // Allow testausserveri.fi for CORS
-    res.header("Access-Control-Allow-Origin", "testausserveri.fi")
+    res.header("Access-Control-Allow-Origin", "*")
     next()
 })
 
