@@ -108,7 +108,7 @@ async function getUserInfo(id) {
  * Initialize the database
  */
 async function init() {
-    return connect(process.env.TEST_CLUSTER ?? "mongodb://mongo:27017/main")
+    return connect(process.env.TEST_CLUSTER ?? "mongodb://testausapis_mongo:27017/main")
 }
 
 module.exports = {
