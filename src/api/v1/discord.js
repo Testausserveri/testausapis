@@ -1,6 +1,7 @@
 const {
     Intents, Client, MessageActionRow, MessageButton
 } = require("discord.js")
+const request = require("./request")
 
 const discordConnectionsURL = "http://api.testausserveri.fi/v1/discord/connections/authorize"
 
@@ -13,6 +14,40 @@ const client = new Client({ intents })
 const slashCommands = require("./slashCommands")
 
 const roleCache = {}
+
+let discordDetectable = {}
+
+/**
+ * Get list of Discord's detectable games (and apps) and cache them
+ * @returns {Promise<null|object>}
+ */
+async function updateDiscordApplicationsCache() {
+    const res = await request("GET", "https://discord.com/api/v9/applications/detectable")
+    if (res.status === 200) {
+        const data = Object.fromEntries(JSON.parse(res.data)
+            .map((application) => [
+                application.id, {
+                    iconUrl: application.icon ? `https://cdn.discordapp.com/app-icons/${application.id}/${application.icon}.webp` : null,
+                    authors:
+                    [application.developers ? application.developers.map((developer) => developer.name) : []]
+                        .concat(application.publishers ? application.publishers.map((publisher) => publisher.name) : [])
+                        .flat(2).filter((
+                            val, index, ar
+                        ) => ar.map((name) => name.toLowerCase()).indexOf(val.toLowerCase()) === index)
+                }
+            ]))
+        if (JSON.stringify(discordDetectable) !== JSON.stringify(data)) {
+            discordDetectable = data
+            console.log("Discord application cache updated.")
+            return data
+        }
+    } else console.error("Failed to update Discord application cache", res.status)
+    return null
+}
+updateDiscordApplicationsCache()
+setInterval(() => {
+    updateDiscordApplicationsCache()
+}, 5 * 60000) // Update cache every 5 minutes
 
 /**
  * @typedef {import("./database")} Database
@@ -59,24 +94,39 @@ class DiscordUtility {
                     displayName: member.displayName,
                     discriminator: member.user.discriminator,
                     id: member.user.id,
-                    presence: member.presence ? member.presence.activities.map((activity) => ({
-                        type: activity.type,
-                        id: activity.applicationId,
-                        emoji: activity.emoji ? ({
-                            animated: activity.emoji.animated,
-                            name: activity.emoji.name,
-                            url: activity.emoji.url
-                        }) : null,
-                        name: activity.name,
-                        details: activity.details,
-                        state: activity.state,
-                        assets: activity.assets ? ({
-                            largeImage: activity.assets.largeImageURL(),
-                            largeImageText: activity.assets.largeText,
-                            smallImage: activity.assets.smallImageURL(),
-                            smallImageText: activity.assets.smallText
-                        }) : []
-                    })) : [],
+                    presence: member.presence ? member.presence.activities.map((activity) => (
+                        discordDetectable[activity.applicationId] ? {
+                            type: "PLAYING",
+                            id: activity.applicationId,
+                            emoji: null,
+                            name: activity.name,
+                            details: discordDetectable[activity.applicationId].authors[0],
+                            state: discordDetectable[activity.applicationId].authors.length > 2 ? `${discordDetectable[activity.applicationId].authors[1]}...` : (discordDetectable[activity.applicationId].authors[1] ?? null),
+                            assets: {
+                                largeImage: discordDetectable[activity.applicationId].iconUrl,
+                                largeImageText: activity.name,
+                                smallImage: null,
+                                smallImageText: null
+                            }
+                        } : {
+                            type: activity.type,
+                            id: activity.applicationId,
+                            emoji: activity.emoji ? ({
+                                animated: activity.emoji.animated,
+                                name: activity.emoji.name,
+                                url: activity.emoji.url
+                            }) : null,
+                            name: activity.name,
+                            details: activity.details,
+                            state: activity.state,
+                            assets: activity.assets ? ({
+                                largeImage: activity.assets.largeImageURL(),
+                                largeImageText: activity.assets.largeText,
+                                smallImage: activity.assets.smallImageURL(),
+                                smallImageText: activity.assets.smallText
+                            }) : []
+                        }
+                    )) : [],
                     avatar: member.user.displayAvatarURL(),
                     banner: member.user.bannerURL(),
                     color: member.user.hexAccentColor,
