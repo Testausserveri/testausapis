@@ -59,6 +59,7 @@ module.exports = async (
         const role = await discordUtility.getRoleData(mainServer, req.query.role)
         if (role === null) return res.status(404).send("No such role.")
         const config = await database.getDataCollectionConfig(mainServer)
+        if (config === null) return res.status(401).send("No public role data available.")
         role.members = role.members.filter((member) => config.allowed.includes(member.id))
         if (role === null) return res.status(401).send("Private role data.")
         return res.json(role)
