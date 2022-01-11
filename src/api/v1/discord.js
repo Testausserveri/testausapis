@@ -84,17 +84,18 @@ class DiscordUtility extends EventEmitter {
         if (!roleCache[role.id] || roleCache[role.id].expiry < new Date().getTime()) {
             roleCache[role.id] = null
             // Fetch members and build response
-            if (fetchOnlyThese) role.members = role.members.filter((member) => fetchOnlyThese.includes(member.id))
+            let roleMembersToProcess = role.members
+            if (fetchOnlyThese) roleMembersToProcess = roleMembersToProcess.filter((member) => fetchOnlyThese.includes(member.id))
             // eslint-disable-next-line no-restricted-syntax
-            for await (const member of role.members) await member[1].user.fetch() // Fetch all members
+            for await (const member of roleMembersToProcess) await member[1].user.fetch() // Fetch all members
             const extraMemberData = {}
             // eslint-disable-next-line no-restricted-syntax
-            for await (const member of role.members) extraMemberData[member[0]] = (await this.database.getUserInfo(member[0]))
+            for await (const member of roleMembersToProcess) extraMemberData[member[0]] = (await this.database.getUserInfo(member[0]))
             response = {
                 name: role.name,
                 id: role.id,
                 color: role.hexColor,
-                members: role.members.map((member) => ({
+                members: roleMembersToProcess.map((member) => ({
                     name: member.user.username,
                     displayName: member.displayName,
                     discriminator: member.user.discriminator,
