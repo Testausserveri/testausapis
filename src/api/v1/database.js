@@ -63,7 +63,7 @@ async function updateDataCollectionPolicy(
     const config = await schemas.DataCollectionConfigurationModel.findOne({ id: serverId })
     const template = {
         id: serverId,
-        allowed: config.allowed ?? []
+        allowed: config?.allowed ?? []
     }
     if (mode === "remove") template.allowed.splice(template.allowed.indexOf(userId), 1)
     else if (mode === "add") template.allowed.push(userId)
