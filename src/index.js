@@ -10,6 +10,8 @@ console.log(`Runtime: ${process.version}`)
 
 require("./console")
 
+if (process.env.DEBUGGING) console.warn("DEBUGGING MODE IS ACTIVE! DISCORD INTERACTIONS WILL BE IGNORED!")
+
 // Initialization
 const app = express()
 

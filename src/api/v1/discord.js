@@ -159,6 +159,7 @@ class DiscordUtility {
  */
 module.exports = (database) => {
     client.on("interactionCreate", async (interaction) => {
+        if (process.env.DEBUGGING) console.debug("Interaction ignored. Debugging mode is active.")
         if (interaction.isCommand()) {
             // Handle commands
             try {
