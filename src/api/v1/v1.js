@@ -25,7 +25,7 @@ database.init().then(() => {
     // Cache all role data on startup
     discordUtility.on("ready", () => {
         console.log("Caching role data...")
-        database.getDataCollectionConfig(mainServer).then((config) => {
+        database.getDataCollectionConfig(mainServer).then(async (config) => {
             for(const id of [rolesWhitelistedForDataExport, rolesWhitelistedForConsensualDataExport].flat(1)) {
                 console.debug("Cache <- ", id)
                 await discordUtility.getRoleData(mainServer, req.query.role, rolesWhitelistedForDataExport.includes(id) ? config.allowed : undefined)
