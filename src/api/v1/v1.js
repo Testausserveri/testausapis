@@ -7,6 +7,7 @@ const mainServer = "697710787636101202"
 const discordCallback = "https://api.testausserveri.fi/v1/discord/connections/authorized"
 const githubCallback = "https://api.testausserveri.fi/v1/github/authorized"
 const rolesWhitelistedForDataExport = ["743950610080071801"]
+const rolesWhitelistedForConsensualDataExport = ["839072621060423771"]
 
 // Internal dependencies
 const database = require("./database")
@@ -20,6 +21,18 @@ let discordUtility // The Discord utility class
 database.init().then(() => {
     discordUtility = discord(database)
     console.log("Connected to the database!")
+    // TODO: Wait for ready, discord
+    // Cache all role data on startup
+    discordUtility.on("ready", () => {
+        console.log("Caching role data...")
+        database.getDataCollectionConfig(mainServer).then((config) => {
+            for(const id of [rolesWhitelistedForDataExport, rolesWhitelistedForConsensualDataExport].flat(1)) {
+                console.debug("Cache <- ", id)
+                await discordUtility.getRoleData(mainServer, req.query.role, rolesWhitelistedForDataExport.includes(id) ? config.allowed : undefined)
+                console.debug("Cached.")
+            }
+        })
+    })
 }).catch((e) => {
     console.error("Failed to connect to the database", e)
 })
@@ -51,17 +64,18 @@ module.exports = async (
         if (!rolesWhitelistedForDataExport.includes(req.query.id)) return res.status(401).send("Private role data.")
         if (!req.query.id) return res.status(400).send("Please specify a role id in the query.")
         const role = await discordUtility.getRoleData(mainServer, req.query.id)
+        if (role === null) return res.status(404).send("No such role or cache miss.")
         return res.json(role)
     }
 
     if (req.method === "GET" && req.path === "/v1/discord/memberInfo") {
         if (!req.query.role) return res.status(400).send("Please specify a role id (as role) in the query.")
-        const role = await discordUtility.getRoleData(mainServer, req.query.role)
-        if (role === null) return res.status(404).send("No such role.")
+        if (!rolesWhitelistedForConsensualDataExport.includes(req.query.role)) return res.status(400).send("Private role data.")
         const config = await database.getDataCollectionConfig(mainServer)
         if (config === null) return res.status(401).send("No public role data available.")
+        const role = await discordUtility.getRoleData(mainServer, req.query.role, config.allowed)
+        if (role === null) return res.status(404).send("No such role or cache miss.")
         role.members = role.members.filter((member) => config.allowed.includes(member.id))
-        if (role === null) return res.status(401).send("Private role data.")
         return res.json(role)
     }
 

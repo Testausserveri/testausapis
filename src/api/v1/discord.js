@@ -1,6 +1,7 @@
 const {
     Intents, Client, MessageActionRow, MessageButton
 } = require("discord.js")
+const { EventEmitter } = require("events")
 const request = require("./request")
 
 const discordConnectionsURL = "http://api.testausserveri.fi/v1/discord/connections/authorize"
@@ -53,7 +54,7 @@ setInterval(() => {
  * @typedef {import("./database")} Database
  */
 
-class DiscordUtility {
+class DiscordUtility extends EventEmitter {
     constructor(database) {
         this.database = database
         this.ready = false // Is the Discord client ready?
@@ -73,13 +74,16 @@ class DiscordUtility {
      * Get relevant analytics data for a specific role
      * @param {string} serverId The server id
      * @param {string} roleId The role id
+     * @param {Record<string, unknown>} fetchOnlyThese Fetch only these members
      */
-    async getRoleData(serverId, roleId) {
+    async getRoleData(serverId, roleId, fetchOnlyThese) {
         const role = await (await client.guilds.fetch(serverId)).roles.fetch(roleId)
         if (role === null) return null
         let response
         if (!roleCache[role.id] || roleCache[role.id].expiry < new Date().getTime()) {
+            roleCache[role.id] = null
             // Fetch members and build response
+            if (fetchOnlyThese) role.members = role.members.filter((member) => fetchOnlyThese.includes(member.id))
             // eslint-disable-next-line no-restricted-syntax
             for await (const member of role.members) await member[1].user.fetch() // Fetch all members
             const extraMemberData = {}
@@ -229,6 +233,7 @@ module.exports = (database) => {
         for await (const guild of client.guilds.cache) {
             await guild[1].commands.set(slashCommands)
         }
+        utilities.emit("ready")
         utilities.ready = true
         console.log("Connected to Discord as", client.user.tag)
     })
