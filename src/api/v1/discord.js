@@ -56,6 +56,7 @@ setInterval(() => {
 
 class DiscordUtility extends EventEmitter {
     constructor(database) {
+        super()
         this.database = database
         this.ready = false // Is the Discord client ready?
     }
