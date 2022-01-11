@@ -28,7 +28,7 @@ database.init().then(() => {
         database.getDataCollectionConfig(mainServer).then(async (config) => {
             for(const id of [rolesWhitelistedForDataExport, rolesWhitelistedForConsensualDataExport].flat(1)) {
                 console.debug("Cache <- ", id)
-                await discordUtility.getRoleData(mainServer, req.query.role, rolesWhitelistedForDataExport.includes(id) ? config.allowed : undefined)
+                await discordUtility.getRoleData(mainServer, id, rolesWhitelistedForDataExport.includes(id) ? config.allowed : undefined)
                 console.debug("Cached.")
             }
         })
