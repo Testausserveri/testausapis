@@ -81,8 +81,11 @@ class DiscordUtility extends EventEmitter {
         const role = await (await client.guilds.fetch(serverId)).roles.fetch(roleId)
         if (role === null) return null
         let response
-        if (!roleCache[role.id] || roleCache[role.id].expiry < new Date().getTime()) {
-            roleCache[role.id] = null
+        if (roleCache[role.id] === undefined || roleCache[role.id].expiry < new Date().getTime()) {
+            roleCache[role.id] = {
+                expiry: new Date().getTime() + 5000,
+                data: { error: "cache miss" }
+            }
             // Fetch members and build response
             let roleMembersToProcess = role.members
             if (fetchOnlyThese) roleMembersToProcess = roleMembersToProcess.filter((member) => fetchOnlyThese.includes(member.id))
