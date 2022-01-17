@@ -3,8 +3,10 @@ const {
 } = require("discord.js")
 const { EventEmitter } = require("events")
 const request = require("./request")
+const { inspect } = require("util")
 
-const discordConnectionsURL = "http://api.testausserveri.fi/v1/discord/connections/authorize"
+const address = process.env.DEBUGGING ? "http://localhost:8080" : "https://api.testausserveri.fi"
+const discordConnectionsURL = `${address}/v1/discord/connections/authorize`
 
 const intents = new Intents()
 intents.add(
@@ -200,7 +202,13 @@ class DiscordUtility extends EventEmitter {
  */
 module.exports = (database) => {
     client.on("interactionCreate", async (interaction) => {
-        if (process.env.DEBUGGING) console.debug("Interaction ignored. Debugging mode is active.")
+        if (process.env.DEBUGGING) {
+            interaction.deferReply = () => {} // Do nothing
+            interaction.reply = interaction.followUp = (...data) => {
+                data = data.map(arg => typeof arg === "object" ? inspect(arg, true, 99, true) : arg)
+                console.debug("Discord interaction response:", ...data)
+            }
+        }
         if (interaction.isCommand()) {
             // Handle commands
             try {
