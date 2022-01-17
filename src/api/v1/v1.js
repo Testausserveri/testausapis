@@ -26,10 +26,12 @@ database.init().then(() => {
     discordUtility.on("ready", () => {
         console.log("Caching role data...")
         database.getDataCollectionConfig(mainServer).then(async (config) => {
+            if (config === null) {
+                console.warn("Data collection configuration for the main server does not exist. Unable to create caches.")
+                return
+            }
             for(const id of [rolesWhitelistedForDataExport, rolesWhitelistedForConsensualDataExport].flat(1)) {
-                console.debug("Cache <- ", id)
-                await discordUtility.getRoleData(mainServer, id, rolesWhitelistedForDataExport.includes(id) ? config.allowed : undefined)
-                console.debug("Cached.")
+                await discordUtility.getRoleData(mainServer, id, rolesWhitelistedForConsensualDataExport.includes(id) ? config.allowed : undefined)
             }
         })
     })

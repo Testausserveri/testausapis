@@ -72,6 +72,79 @@ class DiscordUtility extends EventEmitter {
     }
 
     /**
+     * Update the cache for a specific role
+     * @param {import("discord.js").Role} role 
+     * @param {*} fetchOnlyThese 
+     */
+    async _updateRoleCache(role, fetchOnlyThese) {
+        // Fetch members and build cache
+        let roleMembersToProcess = role.members
+        if (fetchOnlyThese) roleMembersToProcess = roleMembersToProcess.filter((member) => fetchOnlyThese.includes(member.id))
+        // eslint-disable-next-line no-restricted-syntax
+        for await (const member of roleMembersToProcess) await member[1].user.fetch() // Fetch all members
+        const extraMemberData = {}
+        // eslint-disable-next-line no-restricted-syntax
+        for await (const member of roleMembersToProcess) extraMemberData[member[0]] = (await this.database.getUserInfo(member[0]))
+        return {
+            name: role.name,
+            id: role.id,
+            color: role.hexColor,
+            members: roleMembersToProcess.map((member) => ({
+                name: member.user.username,
+                displayName: member.displayName,
+                discriminator: member.user.discriminator,
+                id: member.user.id,
+                presence: member.presence ? member.presence.activities.map((activity) => (
+                    discordDetectable[activity.applicationId] ? {
+                        type: "PLAYING",
+                        id: activity.applicationId,
+                        emoji: null,
+                        name: activity.name,
+                        details: discordDetectable[activity.applicationId].authors[0],
+                        state: discordDetectable[activity.applicationId].authors.length > 2 ? `${discordDetectable[activity.applicationId].authors[1]}...` : (discordDetectable[activity.applicationId].authors[1] ?? null),
+                        assets: {
+                            largeImage: discordDetectable[activity.applicationId].iconUrl,
+                            largeImageText: activity.name,
+                            smallImage: null,
+                            smallImageText: null
+                        }
+                    } : {
+                        type: activity.type,
+                        id: activity.applicationId,
+                        emoji: activity.emoji ? ({
+                            animated: activity.emoji.animated,
+                            name: activity.emoji.name,
+                            url: activity.emoji.url
+                        }) : null,
+                        name: activity.name,
+                        details: activity.details,
+                        state: activity.state,
+                        assets: activity.assets ? ({
+                            largeImage: activity.assets.largeImageURL(),
+                            largeImageText: activity.assets.largeText,
+                            smallImage: activity.assets.smallImageURL(),
+                            smallImageText: activity.assets.smallText
+                        }) : []
+                    }
+                )) : [],
+                avatar: member.user.displayAvatarURL(),
+                banner: member.user.bannerURL(),
+                color: member.user.hexAccentColor,
+                flags: member.user.flags.toArray(),
+                connectedAccounts: extraMemberData[member.user.id]?.connectedAccounts ? extraMemberData[member.user.id]?.connectedAccounts.map((account) => ({
+                    type: account.type,
+                    name: account.name,
+                    id: account.id,
+                    visible: account.visibility === 1
+                })) : [],
+                bio: extraMemberData[member.user.id]?.bio
+            })),
+            count: role.members.size,
+            timestamp: new Date().getTime()
+        }
+    }
+
+    /**
      * Get relevant analytics data for a specific role
      * @param {string} serverId The server id
      * @param {string} roleId The role id
@@ -81,82 +154,41 @@ class DiscordUtility extends EventEmitter {
         const role = await (await client.guilds.fetch(serverId)).roles.fetch(roleId)
         if (role === null) return null
         let response
-        if (roleCache[role.id] === undefined || roleCache[role.id].expiry < new Date().getTime()) {
-            roleCache[role.id] = {
-                expiry: new Date().getTime() + 5000,
-                data: { error: "cache miss" }
-            }
-            // Fetch members and build response
-            let roleMembersToProcess = role.members
-            if (fetchOnlyThese) roleMembersToProcess = roleMembersToProcess.filter((member) => fetchOnlyThese.includes(member.id))
-            // eslint-disable-next-line no-restricted-syntax
-            for await (const member of roleMembersToProcess) await member[1].user.fetch() // Fetch all members
-            const extraMemberData = {}
-            // eslint-disable-next-line no-restricted-syntax
-            for await (const member of roleMembersToProcess) extraMemberData[member[0]] = (await this.database.getUserInfo(member[0]))
-            response = {
-                name: role.name,
-                id: role.id,
-                color: role.hexColor,
-                members: roleMembersToProcess.map((member) => ({
-                    name: member.user.username,
-                    displayName: member.displayName,
-                    discriminator: member.user.discriminator,
-                    id: member.user.id,
-                    presence: member.presence ? member.presence.activities.map((activity) => (
-                        discordDetectable[activity.applicationId] ? {
-                            type: "PLAYING",
-                            id: activity.applicationId,
-                            emoji: null,
-                            name: activity.name,
-                            details: discordDetectable[activity.applicationId].authors[0],
-                            state: discordDetectable[activity.applicationId].authors.length > 2 ? `${discordDetectable[activity.applicationId].authors[1]}...` : (discordDetectable[activity.applicationId].authors[1] ?? null),
-                            assets: {
-                                largeImage: discordDetectable[activity.applicationId].iconUrl,
-                                largeImageText: activity.name,
-                                smallImage: null,
-                                smallImageText: null
-                            }
-                        } : {
-                            type: activity.type,
-                            id: activity.applicationId,
-                            emoji: activity.emoji ? ({
-                                animated: activity.emoji.animated,
-                                name: activity.emoji.name,
-                                url: activity.emoji.url
-                            }) : null,
-                            name: activity.name,
-                            details: activity.details,
-                            state: activity.state,
-                            assets: activity.assets ? ({
-                                largeImage: activity.assets.largeImageURL(),
-                                largeImageText: activity.assets.largeText,
-                                smallImage: activity.assets.smallImageURL(),
-                                smallImageText: activity.assets.smallText
-                            }) : []
-                        }
-                    )) : [],
-                    avatar: member.user.displayAvatarURL(),
-                    banner: member.user.bannerURL(),
-                    color: member.user.hexAccentColor,
-                    flags: member.user.flags.toArray(),
-                    connectedAccounts: extraMemberData[member.user.id]?.connectedAccounts ? extraMemberData[member.user.id]?.connectedAccounts.map((account) => ({
-                        type: account.type,
-                        name: account.name,
-                        id: account.id,
-                        visible: account.visibility === 1
-                    })) : [],
-                    bio: extraMemberData[member.user.id]?.bio
-                })),
-                count: role.members.size,
-                timestamp: new Date().getTime()
-            }
-            roleCache[role.id] = {
-                expiry: new Date().getTime() + 5000,
-                data: response
+        if (roleCache[role.id] === undefined) {
+            // Create the cache
+            this._updateRoleCache(role, fetchOnlyThese).then(data => {
+                roleCache[role.id] = {
+                    expiry: new Date().getTime() + 5000,
+                    data,
+                    updating: false
+                }
+            })
+            await new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve()
+                }, 5000) // The maximum time we will wait for the cache to be created
+            })
+            response = roleCache[role.id]?.data ?? null
+        } else if (roleCache[role.id].expiry < new Date().getTime()) {
+            // Expired cache, update the cache
+            response = roleCache[role.id].data
+            response.cache = "expired"
+            if (!roleCache[role.id].updating) {
+                roleCache[role.id].updating = true
+                this._updateRoleCache(role, fetchOnlyThese).then(data => {
+                    roleCache[role.id] = {
+                        expiry: new Date().getTime() + 5000,
+                        data,
+                        updating: false
+                    }
+                })
+            } else {
+                response.cache = "expired-updating"
             }
         } else {
+            // Valid cache
             response = roleCache[role.id].data
+            response.cache = "valid"
         }
         return response
     }
