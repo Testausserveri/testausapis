@@ -4,8 +4,9 @@ const { Request, Response, NextFunction } = require("express")
 
 // Configuration
 const mainServer = "697710787636101202"
-const discordCallback = "https://api.testausserveri.fi/v1/discord/connections/authorized"
-const githubCallback = "https://api.testausserveri.fi/v1/github/authorized"
+const address = process.env.DEBUGGING ? "http://localhost:8080" : "https://api.testausserveri.fi"
+const discordCallback = `${address}/v1/discord/connections/authorized`
+const githubCallback = `${address}/v1/github/authorized`
 const rolesWhitelistedForDataExport = ["743950610080071801"]
 const rolesWhitelistedForConsensualDataExport = ["839072621060423771"]
 
@@ -102,37 +103,27 @@ module.exports = async (
                 "Content-Type": "application/x-www-form-urlencoded"
             }, params.toString()
         )
-        if (tokenExchange.status === 200) {
-            const token = JSON.parse(tokenExchange.data).access_token
-            const info = await request(
-                "GET", "https://discord.com/api/v9/oauth2/@me", {
-                    Authorization: `Bearer ${token}`
-                }
-            )
-            if (info.status === 200) {
-                const { user } = JSON.parse(info.data)
-                const connections = await request(
-                    "GET", "https://discord.com/api/v8/users/@me/connections", {
-                        Authorization: `Bearer ${token}`
-                    }
-                )
-                if (connections.status === 200) {
-                    // Got the profile data!
-                    const connectedAccounts = JSON.parse(connections.data).filter((account) => account.visibility === 1)
-                    await database.setUserInfo(
-                        user.id, null, connectedAccounts
-                    )
-                    res.status(200).send("Success! Profile updated.")
-                } else {
-                    res.status(401).send("Failed to get profile data.")
-                }
-            } else {
-                res.status(401).send("Failed to get user data.")
+        if (tokenExchange.status !== 200) return res.status(500).send("Failed to access Discord API.")
+        const token = JSON.parse(tokenExchange.data).access_token
+        const info = await request(
+            "GET", "https://discord.com/api/v9/oauth2/@me", {
+                Authorization: `Bearer ${token}`
             }
-        } else {
-            res.status(500).send("Failed to access Discord API.")
-        }
-        return ""
+        )
+        if (info.status !== 200) return res.status(401).send("Failed to get user data.")
+        const { user } = JSON.parse(info.data)
+        const connections = await request(
+            "GET", "https://discord.com/api/v8/users/@me/connections", {
+                Authorization: `Bearer ${token}`
+            }
+        )
+        if (connections.status !== 200) return res.status(401).send("Failed to get profile data.")
+        // Got the profile data!
+        const connectedAccounts = JSON.parse(connections.data).filter((account) => account.visibility === 1)
+        await database.setUserInfo(
+            user.id, null, connectedAccounts
+        )
+        res.status(200).send("Success! Profile updated.")
     }
 
     // Github authorization
