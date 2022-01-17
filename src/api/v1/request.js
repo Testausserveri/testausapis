@@ -24,7 +24,7 @@ module.exports = async function request(
         const requestProtocol = URLConstruct.protocol.replace(":", "")
         if (protocols[requestProtocol]) {
             const req = protocols[requestProtocol].request({
-                path: URLConstruct.pathname + (url.includes("?") ? `?${url.split("?")[1]}` : ""),
+                path: URLConstruct.pathname + (URLConstruct.searchParams.entries.length !== 0 ? `?${URLConstruct.searchParams.toString()}` : ""),
                 method,
                 host: URLConstruct.hostname,
                 port: URLConstruct.port
@@ -44,6 +44,7 @@ module.exports = async function request(
             if (headers) {
                 // eslint-disable-next-line no-restricted-syntax, guard-for-in
                 for (const header in headers) {
+                    if (header.toLowerCase() === "Content-Length") console.warn("Content-Length cannot be set manually.")
                     req.setHeader(header, headers[header])
                 }
             }
