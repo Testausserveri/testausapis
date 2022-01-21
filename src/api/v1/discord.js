@@ -2,8 +2,8 @@ const {
     Intents, Client, MessageActionRow, MessageButton
 } = require("discord.js")
 const { EventEmitter } = require("events")
-const request = require("./request")
 const { inspect } = require("util")
+const request = require("./request")
 
 const address = process.env.DEBUGGING ? "http://localhost:8080" : "https://api.testausserveri.fi"
 const discordConnectionsURL = `${address}/v1/discord/connections/authorize`
@@ -75,10 +75,10 @@ class DiscordUtility extends EventEmitter {
 
     /**
      * Update the cache for a specific role
-     * @param {import("discord.js").Role} role 
-     * @param {*} fetchOnlyThese 
+     * @param {import("discord.js").Role} role
+     * @param {*} fetchOnlyThese
      */
-    async _updateRoleCache(role, fetchOnlyThese) {
+    async updateRoleCache(role, fetchOnlyThese) {
         // Fetch members and build cache
         let roleMembersToProcess = role.members
         if (fetchOnlyThese) roleMembersToProcess = roleMembersToProcess.filter((member) => fetchOnlyThese.includes(member.id))
@@ -129,8 +129,8 @@ class DiscordUtility extends EventEmitter {
                         }) : []
                     }
                 )) : [],
-                avatar: member.user.displayAvatarURL(),
-                banner: member.user.bannerURL(),
+                avatar: member.user.displayAvatarURL({ dynamic: true }),
+                banner: member.user.bannerURL({ dynamic: true }),
                 color: member.user.hexAccentColor,
                 flags: member.user.flags.toArray(),
                 connectedAccounts: extraMemberData[member.user.id]?.connectedAccounts ? extraMemberData[member.user.id]?.connectedAccounts.map((account) => ({
@@ -152,13 +152,15 @@ class DiscordUtility extends EventEmitter {
      * @param {string} roleId The role id
      * @param {Record<string, unknown>} fetchOnlyThese Fetch only these members
      */
-    async getRoleData(serverId, roleId, fetchOnlyThese) {
+    async getRoleData(
+        serverId, roleId, fetchOnlyThese
+    ) {
         const role = await (await client.guilds.fetch(serverId)).roles.fetch(roleId)
         if (role === null) return null
         let response
         if (roleCache[role.id] === undefined) {
             // Create the cache
-            this._updateRoleCache(role, fetchOnlyThese).then(data => {
+            this.updateRoleCache(role, fetchOnlyThese).then((data) => {
                 roleCache[role.id] = {
                     expiry: new Date().getTime() + 5000,
                     data,
@@ -177,7 +179,7 @@ class DiscordUtility extends EventEmitter {
             response.cache = "expired"
             if (!roleCache[role.id].updating) {
                 roleCache[role.id].updating = true
-                this._updateRoleCache(role, fetchOnlyThese).then(data => {
+                this.updateRoleCache(role, fetchOnlyThese).then((data) => {
                     roleCache[role.id] = {
                         expiry: new Date().getTime() + 5000,
                         data,
@@ -205,7 +207,9 @@ module.exports = (database) => {
         if (process.env.DEBUGGING) {
             interaction.deferReply = () => {} // Do nothing
             interaction.reply = interaction.followUp = (...data) => {
-                data = data.map(arg => typeof arg === "object" ? inspect(arg, true, 99, true) : arg)
+                data = data.map((arg) => (typeof arg === "object" ? inspect(
+                    arg, true, 99, true
+                ) : arg))
                 console.debug("Discord interaction response:", ...data)
             }
         }
