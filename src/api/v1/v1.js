@@ -121,7 +121,7 @@ module.exports = async (
         // Got the profile data!
         const connectedAccounts = JSON.parse(connections.data).filter((account) => account.visibility === 1)
         await database.setUserInfo(
-            user.id, null, connectedAccounts
+            user.id, undefined, connectedAccounts
         )
         res.status(200).send("Success! Profile updated.")
     }
