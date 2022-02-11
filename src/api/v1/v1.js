@@ -31,8 +31,11 @@ database.init().then(() => {
                 console.warn("Data collection configuration for the main server does not exist. Unable to create caches.")
                 return
             }
-            for(const id of [rolesWhitelistedForDataExport, rolesWhitelistedForConsensualDataExport].flat(1)) {
-                await discordUtility.getRoleData(mainServer, id, rolesWhitelistedForConsensualDataExport.includes(id) ? config.allowed : undefined)
+            // eslint-disable-next-line no-restricted-syntax
+            for await (const id of [rolesWhitelistedForDataExport, rolesWhitelistedForConsensualDataExport].flat(1)) {
+                await discordUtility.getRoleData(
+                    mainServer, id, rolesWhitelistedForConsensualDataExport.includes(id) ? config.allowed : undefined
+                )
             }
         })
     })
@@ -76,7 +79,9 @@ module.exports = async (
         if (!rolesWhitelistedForConsensualDataExport.includes(req.query.role)) return res.status(400).send("Private role data.")
         const config = await database.getDataCollectionConfig(mainServer)
         if (config === null) return res.status(401).send("No public role data available.")
-        const role = await discordUtility.getRoleData(mainServer, req.query.role, config.allowed)
+        const role = await discordUtility.getRoleData(
+            mainServer, req.query.role, config.allowed
+        )
         if (role === null) return res.status(404).send("No such role or cache miss.")
         role.members = role.members.filter((member) => config.allowed.includes(member.id))
         return res.json(role)
@@ -166,6 +171,7 @@ module.exports = async (
                 "User-Agent": "request"
             }, inviteParams.toString()
         )
+        console.debug("CREATING INVITE", invite)
         if (invite.status !== 200) return res.status(500).send("Failed to create invite.")
 
         // Accept invitation on behalf of user
