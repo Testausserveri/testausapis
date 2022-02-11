@@ -170,7 +170,10 @@ module.exports = async (
             }, JSON.stringify({ invitee_id: user.id })
         )
         console.debug("CREATING INVITE", invite)
-        if (invite.status !== 200) return res.status(500).send("Failed to create invite.")
+        if (invite.status !== 200) {
+            if (JSON.parse(invite.data)?.errors[0]?.message === "Invitee is already a part of this org") return res.status(400).send("You are already part of the org :)")
+            return res.status(500).send("Failed to create invite.")
+        }
 
         // Accept invitation on behalf of user
         const acceptParams = new URLSearchParams()
