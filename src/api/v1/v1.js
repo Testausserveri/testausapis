@@ -163,13 +163,11 @@ module.exports = async (
         const user = JSON.parse(info.data)
 
         // Invite user to the organization using PAT
-        const inviteParams = new URLSearchParams()
-        inviteParams.append("invitee_id", user.id)
         const invite = await request(
             "POST", "https://api.github.com/orgs/Testausserveri/invitations", {
                 Authorization: `token ${process.env.GH_PAT}`,
                 "User-Agent": "request"
-            }, inviteParams.toString()
+            }, JSON.stringify({ invitee_id: user.id })
         )
         console.debug("CREATING INVITE", invite)
         if (invite.status !== 200) return res.status(500).send("Failed to create invite.")
