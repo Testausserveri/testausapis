@@ -45,6 +45,7 @@ app.use((_, res) => {
     if (!res.headersSent) res.status(404).send("Not found.")
 })
 
-app.listen(8080, () => {
-    console.log("Webserver listening port", 8080)
+const port = process.env.HTTP_PORT || 8080
+app.listen(port, () => {
+    console.log("Webserver listening port", port)
 })

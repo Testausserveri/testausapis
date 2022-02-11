@@ -4,7 +4,7 @@ const { Request, Response, NextFunction } = require("express")
 
 // Configuration
 const mainServer = "697710787636101202"
-const address = process.env.DEBUGGING ? "http://localhost:8080" : "https://api.testausserveri.fi"
+const address = process.env.HTTP_URL
 const discordCallback = `${address}/v1/discord/connections/authorized`
 const githubCallback = `${address}/v1/github/authorized`
 const rolesWhitelistedForDataExport = ["743950610080071801"]
@@ -89,7 +89,7 @@ module.exports = async (
 
     // Discord authorization
     if (req.method === "GET" && req.path === "/v1/discord/connections/authorize") {
-        return res.redirect(`https://discord.com/api/oauth2/authorize?client_id=917512133535748126&response_type=code&scope=identify%20connections&redirect_uri=${discordCallback}`)
+        return res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${process.env.DISCORD_CLIENT_ID}&response_type=code&scope=identify%20connections&redirect_uri=${discordCallback}`)
     }
 
     if (req.method === "GET" && req.path === "/v1/discord/connections/authorized") {
@@ -98,7 +98,7 @@ module.exports = async (
         if (!code) return res.status(400).send("Missing code from request query.")
         // Get token
         const params = new URLSearchParams()
-        params.append("client_id", "917512133535748126")
+        params.append("client_id", process.env.DISCORD_CLIENT_ID)
         params.append("client_secret", process.env.DISCORD_SECRET)
         params.append("grant_type", "authorization_code")
         params.append("code", code)
@@ -140,7 +140,7 @@ module.exports = async (
     if (req.method === "GET" && req.path === "/v1/github/authorized") {
         // Fetch the access token
         const code = await getQuery("code", req.url)
-        if (!code) return res.status(400).send("Missing code from request query.")
+        if (!code) return res.status(500).send("GitHub authorization failed, please contact administrator.")
         const tokenParams = new URLSearchParams()
         tokenParams.append("client_id", process.env.GH_CLIENT_ID)
         tokenParams.append("client_secret", process.env.GH_CLIENT_SECRET)
@@ -164,38 +164,59 @@ module.exports = async (
 
         // Invite user to the organization using PAT
         const invite = await request(
-            "POST", "https://api.github.com/orgs/Testausserveri/invitations", {
+            "POST", `https://api.github.com/orgs/${process.env.GH_NAME}/invitations`, {
                 Authorization: `token ${process.env.GH_PAT}`,
                 "User-Agent": "request"
             }, JSON.stringify({ invitee_id: user.id })
         )
         console.debug("CREATING INVITE", invite)
-        if (invite.status !== 200) {
-            if (JSON.parse(invite.data)?.errors[0]?.message === "Invitee is already a part of this org") return res.status(400).send("You are already part of the org :)")
+        if (invite.status > 299) {
+            if (JSON.parse(invite.data)?.errors[0]?.message === "Invitee is already a part of this org") return res.redirect(`https://github.com/${process.env.GH_NAME}`)
             return res.status(500).send("Failed to create invite.")
         }
 
+        const acceptBody = JSON.stringify({
+            accept: "application/vnd.github.v3+json",
+            state: "active"
+        })
         // Accept invitation on behalf of user
-        const acceptParams = new URLSearchParams()
-        acceptParams.append("accept", "application/vnd.github.v3+json")
-        acceptParams.append("state", "active")
         const accept = await request(
-            "PATCH", "https://api.github.com/user/memberships/orgs/Testausserveri", {
+            "PATCH",
+            `https://api.github.com/user/memberships/orgs/${process.env.GH_NAME}`,
+            {
                 Authorization: `token ${userAccessToken}`,
                 "User-Agent": "request"
-            }, acceptParams.toString()
+            },
+            acceptBody
         )
-        if (accept.status !== 200) return res.status(500).send("Failed to process invite.")
+        console.debug(accept)
+
+        if (accept.status > 299) return res.status(500).send("Failed to process invite.")
 
         // Publicize membership
         const publicize = await request(
-            "PUT", `https://api.github.com/orgs/Testausserveri/public_members/${user.login}`, {
+            "PUT",
+            `https://api.github.com/orgs/${process.env.GH_NAME}/public_members/${user.login}`,
+            {
                 Authorization: `token ${new URLSearchParams(tokenExchange.data).get("access_token")}`,
                 "User-Agent": "request"
-            }, acceptParams.toString()
+            }
         )
-        if (publicize.status !== 200) return res.status(500).send("Failed to make membership public. (Though your invitation was processed)")
-        return res.redirect("https://testausserveri.fi?joinedGithub")
+        console.debug(publicize)
+        if (publicize.status > 299) return res.status(500).send("Failed to make membership public. (Though your invitation was processed)")
+
+        request(
+            "POST",
+            process.env.DISCORD_WEBHOOK,
+            {
+                "Content-Type": "application/json"
+            },
+            JSON.stringify({
+                content: `${user.login} liittyi Testausserverin GitHub organisaatioon! 🎉 Liity sinäkin: <${process.env.GH_JOIN_URL}>`
+            })
+        )
+
+        return res.redirect(`https://github.com/${process.env.GH_NAME}`)
     }
 
     return next()
