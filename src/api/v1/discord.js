@@ -206,7 +206,9 @@ module.exports = (database) => {
     client.on("interactionCreate", async (interaction) => {
         if (process.env.DEBUGGING) {
             interaction.deferReply = () => {} // Do nothing
+            // eslint-disable-next-line no-multi-assign
             interaction.reply = interaction.followUp = (...data) => {
+                // eslint-disable-next-line no-param-reassign
                 data = data.map((arg) => (typeof arg === "object" ? inspect(
                     arg, true, 99, true
                 ) : arg))

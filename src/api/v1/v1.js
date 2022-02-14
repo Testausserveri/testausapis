@@ -169,7 +169,6 @@ module.exports = async (
                 "User-Agent": "request"
             }, JSON.stringify({ invitee_id: user.id })
         )
-        console.debug("CREATING INVITE", invite)
         if (invite.status > 299) {
             if (JSON.parse(invite.data)?.errors[0]?.message === "Invitee is already a part of this org") return res.redirect(`https://github.com/${process.env.GH_NAME}`)
             return res.status(500).send("Failed to create invite.")
@@ -189,7 +188,6 @@ module.exports = async (
             },
             acceptBody
         )
-        console.debug(accept)
 
         if (accept.status > 299) return res.status(500).send("Failed to process invite.")
 
@@ -202,7 +200,7 @@ module.exports = async (
                 "User-Agent": "request"
             }
         )
-        console.debug(publicize)
+
         if (publicize.status > 299) return res.status(500).send("Failed to make membership public. (Though your invitation was processed)")
 
         request(
