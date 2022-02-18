@@ -126,7 +126,7 @@ class DiscordUtility extends EventEmitter {
                             largeImageText: activity.assets.largeText,
                             smallImage: activity.assets.smallImageURL(),
                             smallImageText: activity.assets.smallText
-                        }) : []
+                        }) : {}
                     }
                 )) : [],
                 avatar: member.user.displayAvatarURL({ dynamic: true }),
