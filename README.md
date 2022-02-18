@@ -7,7 +7,7 @@ Root: `/*`
 ## Version 1
 Root: `/v1/*`
 
-### GET /v1/discord/guildInfo
+### GET `/v1/discord/guildInfo`
 Daily activity statistics of the Testausserveri.fi Discord server.
 Example response:
 
@@ -24,7 +24,7 @@ Access-Control-Allow-Origin: *
 
 *Values `N/A` when unavailable*
 
-### GET /v1/discord/roleInfo
+### GET `/v1/discord/roleInfo`
 Get activity and general user information for a specific role.
 Role is specified with the query parameter `id` as the role id.
 This API publishes only otherwise public information.
@@ -49,23 +49,23 @@ Access-Control-Allow-Origin: *
 - "timestamp", Unix timestamp of the time of response generation
 - "cache", A cacheState (see below)
 
-### GET /v1/discord/memberInfo
+### GET `/v1/discord/memberInfo`
 Get activity & general user information for a specific.
 Role is specified with the query parameter `id` as the role id.
 This API publishes possibly private information and requires the users to opt-in for their data to be published.
 
 The response format is identical with /v1/discord/roleInfo
 
-### GET /v1/discord/connections/authorize
+### GET `/v1/discord/connections/authorize`
 Redirects the user to Discord OAuth 2.0 authorization page to grant the API access to account information.
 
-### GET /v1/discord/connections/authorized
+### GET `/v1/discord/connections/authorized`
 Handle the OAuth 2.0 callback from Discord and update cached account information.
 
-### GET /v1/github/authorize
+### GET `/v1/github/authorize`
 Redirects the user to Github OAuth 2.0 authorization page to grant the API access to account information.
 
-### GET /v1/github/authorized
+### GET `/v1/github/authorized`
 Handle the OAuth 2.0 callback from Github and add the user to the Testausserveri ry organization.
 
 ## Version 1 standards
