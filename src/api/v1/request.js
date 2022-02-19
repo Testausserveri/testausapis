@@ -24,7 +24,7 @@ module.exports = async function request(
         const requestProtocol = URLConstruct.protocol.replace(":", "")
         if (protocols[requestProtocol]) {
             const req = protocols[requestProtocol].request({
-                path: URLConstruct.pathname + (URLConstruct.searchParams.getAll().length !== 0 ? `?${URLConstruct.searchParams.toString()}` : ""),
+                path: URLConstruct.pathname + (URLConstruct.searchParams.entries.length !== 0 ? `?${URLConstruct.searchParams.toString()}` : ""),
                 method,
                 host: URLConstruct.hostname,
                 port: URLConstruct.port
