@@ -57,7 +57,7 @@ This API publishes possibly private information and requires the users to opt-in
 The response format is identical with /v1/discord/roleInfo
 
 ### GET `/v1/discord/connections/authorize`
-Redirects the user to Discord OAuth 2.0 authorization page to grant the API access to account information.
+Redirects the user to the Discord OAuth 2.0 authorization page to grant the API access to account information.
 
 ### GET `/v1/discord/connections/authorized`
 Handle the OAuth 2.0 callback from Discord and update cached account information.
