@@ -50,8 +50,8 @@ Access-Control-Allow-Origin: *
 - "cache", A cacheState (see below)
 
 ### GET `/v1/discord/memberInfo`
-Get activity & general user information for a specific.
-Role is specified with the query parameter `id` as the role id.
+Get activity & general user information for a specific role.
+The role is specified with the query parameter `id` as the role id.
 This API publishes possibly private information and requires the users to opt-in for their data to be published.
 
 The response format is identical with /v1/discord/roleInfo
