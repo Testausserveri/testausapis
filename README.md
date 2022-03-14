@@ -19,7 +19,7 @@ Content-Length: 39
 X-Powered-By: Express
 Access-Control-Allow-Origin: *
 
-{"memberCount":1223,"messagesToday":32}
+{"memberCount":1223,"membersOnline":1130,"messagesToday":32}
 ```
 
 *Values `N/A` when unavailable*
