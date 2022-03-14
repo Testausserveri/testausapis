@@ -74,6 +74,17 @@ class DiscordUtility extends EventEmitter {
     }
 
     /**
+     * Get the number of members online in a Discord server
+     * @param {string} id
+     * @returns {Promise<string | null>}
+     */
+    // eslint-disable-next-line class-methods-use-this
+    async getOnlineCount(id) {
+        const guild = await client.guilds.fetch(id)
+        return guild !== null ? (await guild.members.fetch()).filter((member) => member.user.bot === false && member?.presence?.status !== "offline").size : null
+    }
+
+    /**
      * Update the cache for a specific role
      * @param {import("discord.js").Role} role
      * @param {*} fetchOnlyThese

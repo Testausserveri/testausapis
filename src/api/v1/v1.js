@@ -59,8 +59,10 @@ module.exports = async (
     if (req.method === "GET" && req.path === "/v1/discord/guildInfo") {
         const messagesToday = await database.getMessageCount(mainServer)
         const memberCount = await discordUtility.getMemberCount(mainServer)
+        const membersOnline = await discordUtility.getOnlineCount(mainServer)
         return res.json({
             memberCount: memberCount ?? "N/A",
+            membersOnline: membersOnline ?? "N/A",
             messagesToday: messagesToday ?? "N/A"
         })
     }
