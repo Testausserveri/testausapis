@@ -50,14 +50,14 @@ Access-Control-Allow-Origin: *
 - "cache", A cacheState (see below)
 
 ### GET `/v1/discord/memberInfo`
-Get activity & general user information for a specific.
-Role is specified with the query parameter `id` as the role id.
+Get activity & general user information for a specific role.
+The role is specified with the query parameter `id` as the role id.
 This API publishes possibly private information and requires the users to opt-in for their data to be published.
 
 The response format is identical with /v1/discord/roleInfo
 
 ### GET `/v1/discord/connections/authorize`
-Redirects the user to Discord OAuth 2.0 authorization page to grant the API access to account information.
+Redirects the user to the Discord OAuth 2.0 authorization page to grant the API access to account information.
 
 ### GET `/v1/discord/connections/authorized`
 Handle the OAuth 2.0 callback from Discord and update cached account information.
