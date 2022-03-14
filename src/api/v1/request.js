@@ -1,62 +1,105 @@
+/* eslint-disable guard-for-in */
 /* eslint-disable global-require */
-// Supported protocols
+/* eslint-disable max-classes-per-file */
+
+// Custom types
+/**
+ * @typedef {"GET"|"POST"|"PUT"|"DELETE"|"OPTIONS"} requestMethod
+ */
+/**
+ * @typedef {object} requestOptions
+ * @property {boolean} stringify Should the response body be converted into an utf-8 string (default: true)
+ * @property {string} overrideContentLength Override the Content-Length header with this value
+ */
+/**
+ * @typedef {object} requestResponse
+ * @property {string} status HTTP response status code
+ * @property {Object} headers HTTP response headers
+ * @property {string|Buffer} body HTTP response body
+ */
+
+// Custom errors
+class URLParsingError extends Error {
+    constructor(m) {
+        super(m)
+        Object.setPrototypeOf(this, Error.prototype)
+        this.name = "URLParsingError"
+    }
+}
+class RequestError extends Error {
+    constructor(m) {
+        super(m)
+        Object.setPrototypeOf(this, Error.prototype)
+        this.name = "RequestError"
+    }
+}
+
+// Protocol libraries
 const protocols = {
     http: require("http"),
     https: require("https")
 }
 
-// Typings
-// require("../../typings/request")
-
 /**
- * Make a simple HTTPS request
- * @param {string} method The request method
- * @param {string} url The request url
- * @param {Record<string, unknown>} headers The request headers
- * @param {string} body The request body
- * @returns {RequestResponse}
+ * Perform a simple HTTP request
+ * @param {requestMethod} method
+ * @param {string} url
+ * @param {Object} headers
+ * @param {string|Buffer|undefined} body
+ * @param {requestOptions} options
+ * @returns {Promise<requestResponse>}
  */
-module.exports = async function request(
-    method, url, headers, body
-) {
-    return new Promise((resolve, reject) => {
-        const URLConstruct = new URL(url)
-        const requestProtocol = URLConstruct.protocol.replace(":", "")
-        if (protocols[requestProtocol]) {
-            const req = protocols[requestProtocol].request({
-                path: URLConstruct.pathname + (URLConstruct.searchParams.entries.length !== 0 ? `?${URLConstruct.searchParams.toString()}` : ""),
-                method,
-                host: URLConstruct.hostname,
-                port: URLConstruct.port
-            }, (res) => {
-                const d = []
-                res.on("data", (buffer) => {
-                    d.push(buffer)
-                })
-                res.on("end", async () => {
-                    resolve({
-                        status: res.statusCode,
-                        headers: res.headers,
-                        data: Buffer.concat(d).toString()
-                    })
-                })
-            })
-            if (headers) {
-                // eslint-disable-next-line no-restricted-syntax, guard-for-in
-                for (const header in headers) {
-                    if (header.toLowerCase() === "Content-Length") console.warn("Content-Length cannot be set manually.")
-                    req.setHeader(header, headers[header])
-                }
-            }
-            if (req.method !== "GET" && body) {
-                req.setHeader("Content-Length", Buffer.byteLength(body))
-                req.write(body)
-                req.end()
-            } else {
-                req.end()
-            }
-        } else {
-            reject(new Error("Unknown protocol"))
+module.exports = (
+    method, url, headers, body, options
+) => new Promise((resolve, reject) => {
+    // Parse the URL
+    let urlInstance
+    try {
+        urlInstance = new URL(url)
+    } catch (err) {
+        reject(new URLParsingError(err))
+        return
+    }
+
+    // Get the correct protocol library
+    const library = protocols[urlInstance.protocol.toLowerCase().replace(":", "")]
+    if (library === undefined) {
+        reject(new RequestError(`Unknown protocol. Expected one of ${Object.keys(protocols).join(", ")}. Got "${urlInstance.protocol}"`))
+        return
+    }
+
+    // Validate body format
+    if (typeof body !== "string" && !(body instanceof Buffer) && body !== undefined) {
+        reject(new RequestError("Body type is incorrect. Expected type of string or instance of Buffer"))
+        return
+    }
+
+    // Validate header format
+    if (typeof headers !== "object" && typeof headers !== "undefined") {
+        reject(new RequestError("Headers must be type of object"))
+        return
+    }
+
+    // Do the request
+    const request = library.request(
+        urlInstance, { method }, (res) => {
+            const buffer = []
+            res.on("data", (chunk) => buffer.push(chunk))
+            res.once("end", () => resolve({
+                status: res.statusCode,
+                headers: res.headers,
+                data: options?.stringify === false ? Buffer.concat(buffer) : Buffer.concat(buffer).toString()
+            }))
         }
-    })
-}
+    )
+
+    // Send headers
+    // eslint-disable-next-line no-restricted-syntax
+    if (headers !== undefined && Object.keys(headers).length !== 0) for (const header of Object.keys(headers)) request.setHeader(header, headers[header])
+    if (options?.overrideContentLength) request.setHeader("Content-Length", options.overrideContentLength)
+    else if (body !== undefined && body.length > 0) {
+        request.setHeader("Content-Length", Buffer.byteLength(body))
+        request.write(body)
+    }
+    request.end()
+})
