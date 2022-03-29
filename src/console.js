@@ -38,12 +38,14 @@ global.consoleConfig = {
     }
 }
 
-// eslint-disable-next-line no-restricted-syntax, guard-for-in
-for (const func in global.consoleConfig) {
-    const real = console[func]
-    console[func] = async (...args) => { // A proxy
-        real(
-            `${colors.Reset}[ ${new Date().toTimeString().split(" ")[0]} ]${colors[global.consoleConfig[func].color] ?? ""}`, global.consoleConfig[func].prefix ?? "", ...args, colors.Reset
-        )
+module.exports = () => {
+    // eslint-disable-next-line no-restricted-syntax, guard-for-in
+    for (const func in global.consoleConfig) {
+        const real = console[func]
+        console[func] = async (...args) => { // A proxy
+            real(
+                `${colors.Reset}[ ${new Date().toTimeString().split(" ")[0]} ]${colors[global.consoleConfig[func].color] ?? ""}`, global.consoleConfig[func].prefix ?? "", ...args, colors.Reset
+            )
+        }
     }
 }

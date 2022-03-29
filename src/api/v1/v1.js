@@ -130,7 +130,7 @@ module.exports = async (
         await database.setUserInfo(
             user.id, undefined, connectedAccounts
         )
-        res.status(200).send("Success! Profile updated.")
+        return res.status(200).send("Success! Profile updated.")
     }
 
     // Github authorization

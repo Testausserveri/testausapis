@@ -8,7 +8,7 @@ const v1 = require("./api/v1/v1")
 console.log(`Package: ${Package.name}@${Package.version}`)
 console.log(`Runtime: ${process.version}`)
 
-require("./console")
+require("./console")()
 
 if (process.env.DEBUGGING) console.warn("DEBUGGING MODE IS ACTIVE! DISCORD INTERACTIONS WILL BE IGNORED!")
 
@@ -17,8 +17,8 @@ const app = express()
 
 // Webserver
 app.use((
-    req, res, next
-) => { // Allow testausserveri.fi for CORS
+    _, res, next
+) => { // Allow everyone for CORS
     res.setHeader("Access-Control-Allow-Origin", "*")
     next()
 })
@@ -35,11 +35,7 @@ app.get("/", (_, res) => {
 })
 
 // API
-app.use(async (
-    req, res, next
-) => v1(
-    req, res, next
-))
+app.use(v1)
 
 app.use((_, res) => {
     if (!res.headersSent) res.status(404).send("Not found.")
