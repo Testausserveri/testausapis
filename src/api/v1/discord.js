@@ -85,6 +85,20 @@ class DiscordUtility extends EventEmitter {
     }
 
     /**
+     * Get server boost status information in a Discord server
+     * @param {string} id
+     * @returns {Promise<{ subscriptions: number, tier: number } | null>}
+     */
+    // eslint-disable-next-line class-methods-use-this
+    async getBoostStatus(id) {
+        const guild = await client.guilds.fetch(id)
+        return guild !== null ? {
+            subscriptions: guild.premiumSubscriptionCount,
+            tier: guild.premiumTier.includes("_") ? parseInt(guild.premiumTier.split("_")[1], 10) : 0
+        } : null
+    }
+
+    /**
      * Update the cache for a specific role
      * @param {import("discord.js").Role} role
      * @param {*} fetchOnlyThese
