@@ -8,7 +8,7 @@ const address = process.env.HTTP_URL
 const discordCallback = `${address}/v1/discord/connections/authorized`
 const githubCallback = `${address}/v1/github/authorized`
 const rolesWhitelistedForDataExport = ["743950610080071801"]
-const rolesWhitelistedForConsensualDataExport = ["839072621060423771"]
+const rolesWhitelistedForConsensualDataExport = ["839072621060423771", "755327895106486324"]
 
 // Internal dependencies
 const database = require("./database")
