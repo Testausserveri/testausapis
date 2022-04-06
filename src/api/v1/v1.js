@@ -65,7 +65,7 @@ module.exports = async (
             memberCount: memberCount ?? "N/A",
             membersOnline: membersOnline ?? "N/A",
             messagesToday: messagesToday ?? "N/A",
-            premium: boostStatus ?? "N/A"
+            premium: boostStatus ?? { subscriptions: "N/A", trier: "N/A" }
         })
     }
 
