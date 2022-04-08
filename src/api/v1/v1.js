@@ -218,7 +218,7 @@ module.exports = async (
             })
         )
 
-        return res.redirect(`https://github.com/${process.env.GH_NAME}`)
+        return res.redirect("https://testausserveri.fi/githubJoined")
     }
 
     return next()
