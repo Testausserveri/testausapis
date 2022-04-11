@@ -60,12 +60,13 @@ module.exports = async (
         const messagesToday = await database.getMessageCount(mainServer)
         const memberCount = await discordUtility.getMemberCount(mainServer)
         const membersOnline = await discordUtility.getOnlineCount(mainServer)
-        const boostStatus = await discordUtility.getBoostStatus(mainServer)
+        const config = await database.getDataCollectionConfig(mainServer)
+        const boostStatus = await discordUtility.getBoostStatus(mainServer, config?.allowed ?? [])
         return res.json({
             memberCount: memberCount ?? "N/A",
             membersOnline: membersOnline ?? "N/A",
             messagesToday: messagesToday ?? "N/A",
-            premium: boostStatus ?? { subscriptions: "N/A", trier: "N/A" }
+            premium: boostStatus ?? { subscriptions: "N/A", trier: "N/A", subscribers: [] }
         })
     }
 

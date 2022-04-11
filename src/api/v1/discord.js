@@ -87,14 +87,18 @@ class DiscordUtility extends EventEmitter {
     /**
      * Get server boost status information in a Discord server
      * @param {string} id
+     * @param {string[]} fetchOnlyThese Only fetch these members
      * @returns {Promise<{ subscriptions: number, tier: number } | null>}
      */
     // eslint-disable-next-line class-methods-use-this
-    async getBoostStatus(id) {
+    async getBoostStatus(id, fetchOnlyThese) {
         const guild = await client.guilds.fetch(id)
         return guild !== null ? {
             subscriptions: guild.premiumSubscriptionCount,
-            tier: guild.premiumTier.includes("_") ? parseInt(guild.premiumTier.split("_")[1], 10) : 0
+            tier: guild.premiumTier.includes("_") ? parseInt(guild.premiumTier.split("_")[1], 10) : 0,
+            subscribers: (await guild.members.fetch())
+                .filter((member) => member.premiumSince !== null && fetchOnlyThese.includes(member.id))
+                .map((member) => ({ name: member.nickname ?? member.displayName, avatar: member.avatarURL() }))
         } : null
     }
 
