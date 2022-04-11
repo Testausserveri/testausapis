@@ -86,9 +86,9 @@ module.exports = async (
     if (req.method === "GET" && req.path === "/v1/discord/memberInfo") {
         if (!req.query.role) return res.status(400).send("Please specify a role id (as role) in the query.")
         let role
-        if (rolesWhitelistedForDataExport.includes(req.query.id)) {
+        if (rolesWhitelistedForDataExport.includes(req.query.role)) {
             // Public data
-            role = await discordUtility.getRoleData(mainServer, req.query.id)
+            role = await discordUtility.getRoleData(mainServer, req.query.role)
             if (role === null) return res.status(404).send("No such role or cache miss.")
         } else {
             // Requires consent
