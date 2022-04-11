@@ -5,6 +5,8 @@ WORKDIR /usr/src/app
 COPY package.json .
 COPY package-lock.json .
 RUN npm ci
+ENV TZ=Europe/Helsinki
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 COPY src ./src
 
