@@ -98,7 +98,7 @@ class DiscordUtility extends EventEmitter {
             tier: guild.premiumTier.includes("_") ? parseInt(guild.premiumTier.split("_")[1], 10) : 0,
             subscribers: (await guild.members.fetch())
                 .filter((member) => member.premiumSince !== null && fetchOnlyThese.includes(member.id))
-                .map((member) => ({ name: member.nickname ?? member.displayName, avatar: member.user.displayAvatarURL({ dynamic: true }) }))
+                .map((member) => ({ id: member.id, name: member.nickname ?? member.displayName, avatar: member.user.displayAvatarURL({ dynamic: true }) }))
         } : null
     }
 
