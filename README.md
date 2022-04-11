@@ -25,7 +25,7 @@ Access-Control-Allow-Origin: *
 *Values `N/A` when unavailable*
 
 ### GET `/v1/discord/roleInfo`
-Get activity and general user information for a specific role.
+Get general information about a specific role.
 Role is specified with the query parameter `id` as the role id.
 This API publishes only otherwise public information.
 
@@ -37,7 +37,7 @@ Content-Type: application/json; charset=utf-8
 X-Powered-By: Express
 Access-Control-Allow-Origin: *
 
-{"name":"masterminds","id":"743950610080071801","color":"#206694","members":[...],"count":3,"timestamp":1645164551244,"cache":"expired"}
+{"name":"masterminds","id":"743950610080071801","color":"#206694","count":3,"timestamp":1645164551244,"cache":"expired"}
 ```
 
 **Value definitions**
