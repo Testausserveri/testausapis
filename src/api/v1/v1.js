@@ -17,6 +17,7 @@ const request = require("./request")
 const getQuery = require("./getQuery")
 
 let discordUtility // The Discord utility class
+let guildInfoCache = null
 
 // Initialize the Discord client & Database
 database.init().then(() => {
@@ -55,19 +56,23 @@ module.exports = async (
     // Verify that we are ready to serve data
     if (discordUtility === undefined) return res.status(503).send("Service is getting ready...")
 
-    // GuildInfo
+    // GuildInfo, 5s cache
     if (req.method === "GET" && req.path === "/v1/discord/guildInfo") {
+        if (guildInfoCache && guildInfoCache.timestamp + 5000 > new Date().getTime()) return res.json({ cache: "valid", ...guildInfoCache })
+        if (guildInfoCache) res.json({ cache: "expired-updating", ...guildInfoCache })
         const messagesToday = await database.getMessageCount(mainServer)
+        const config = await database.getDataCollectionConfig(mainServer)
         const memberCount = await discordUtility.getMemberCount(mainServer)
         const membersOnline = await discordUtility.getOnlineCount(mainServer)
-        const config = await database.getDataCollectionConfig(mainServer)
         const boostStatus = await discordUtility.getBoostStatus(mainServer, config?.allowed ?? [])
-        return res.json({
+        guildInfoCache = {
             memberCount: memberCount ?? "N/A",
             membersOnline: membersOnline ?? "N/A",
             messagesToday: messagesToday ?? "N/A",
-            premium: boostStatus ?? { subscriptions: "N/A", trier: "N/A", subscribers: [] }
-        })
+            premium: boostStatus ?? { subscriptions: "N/A", trier: "N/A", subscribers: [] },
+            timestamp: new Date().getTime()
+        }
+        return !res.headersSent ? res.json({ cache: "valid", ...guildInfoCache }) : null
     }
 
     // RoleInfo
