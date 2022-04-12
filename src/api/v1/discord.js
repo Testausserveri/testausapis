@@ -47,6 +47,7 @@ async function updateDiscordApplicationsCache() {
     } else console.error("Failed to update Discord application cache", res.status)
     return null
 }
+
 updateDiscordApplicationsCache()
 setInterval(() => {
     updateDiscordApplicationsCache()
@@ -97,8 +98,14 @@ class DiscordUtility extends EventEmitter {
             subscriptions: guild.premiumSubscriptionCount,
             tier: guild.premiumTier.includes("_") ? parseInt(guild.premiumTier.split("_")[1], 10) : 0,
             subscribers: (await guild.members.fetch())
-                .filter((member) => member.premiumSince !== null && fetchOnlyThese.includes(member.id))
-                .map((member) => ({ id: member.id, name: member.nickname ?? member.displayName, avatar: member.user.displayAvatarURL({ dynamic: true }) }))
+                .filter((member) => member.premiumSince !== null)
+                .map((member) => (!fetchOnlyThese.includes(member.id) ?
+                    ({
+                        id: null, name: null, avatar: null, isHidden: true
+                    }) :
+                    ({
+                        id: member.id, name: member.nickname ?? member.displayName, avatar: member.user.displayAvatarURL({ dynamic: true }), isHidden: false
+                    })))
         } : null
     }
 
