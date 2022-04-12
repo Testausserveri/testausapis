@@ -2,6 +2,11 @@ const { connect } = require("mongoose")
 
 const schemas = require("./schemas")
 
+const cache = {
+    messageCounts: {},
+    dataCollectionPolicies: {}
+}
+
 // Database functions
 
 /**
@@ -22,17 +27,19 @@ async function incrementMessageCount(id) {
             template.count = 0
         } else template.count = (typeof server.count === "number" ? server.count : 0) + 1
     }
+    cache.messageCounts[id] = { timestamp: new Date().getTime(), count: server.count }
     await schemas.MessageCountModel.findOneAndUpdate(
         { id }, template, { upsert: true }
     )
 }
 
 /**
- * Get server's daily message count
+ * Get server's daily message count, cache of 3 seconds
  * @param {string} id
  * @returns {Promise<null|Number>}
  */
 async function getMessageCount(id) {
+    if (cache.messageCounts[id] && cache.messageCounts[id].timestamp + 3000 < new Date().getTime()) return cache.messageCounts[id].count
     const template = {
         count: 0,
         id,
@@ -48,6 +55,7 @@ async function getMessageCount(id) {
             )
         }
     }
+    cache.messageCounts[id] = { timestamp: new Date().getTime(), count: server.count }
     return server?.count
 }
 
@@ -67,6 +75,7 @@ async function updateDataCollectionPolicy(
     }
     if (mode === "remove") template.allowed.splice(template.allowed.indexOf(userId), 1)
     else if (mode === "add") template.allowed.push(userId)
+    cache.dataCollectionPolicies[serverId] = template
     return schemas.DataCollectionConfigurationModel.findOneAndUpdate({ id: serverId }, template, { upsert: true })
 }
 
@@ -75,7 +84,7 @@ async function updateDataCollectionPolicy(
  * @param {string} id The server Id
  */
 async function getDataCollectionConfig(id) {
-    return schemas.DataCollectionConfigurationModel.findOne({ id }).exec()
+    return cache.dataCollectionPolicies[id] ?? schemas.DataCollectionConfigurationModel.findOne({ id }).exec()
 }
 
 /**
