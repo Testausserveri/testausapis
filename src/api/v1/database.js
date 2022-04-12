@@ -39,7 +39,7 @@ async function incrementMessageCount(id) {
  * @returns {Promise<null|Number>}
  */
 async function getMessageCount(id) {
-    if (cache.messageCounts[id] && cache.messageCounts[id].timestamp + 3000 < new Date().getTime()) return cache.messageCounts[id].count
+    if (cache.messageCounts[id] && cache.messageCounts[id].timestamp + 3000 > new Date().getTime()) return cache.messageCounts[id].count
     const template = {
         count: 0,
         id,
