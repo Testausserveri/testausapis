@@ -112,7 +112,8 @@ class DiscordUtility extends EventEmitter {
     /**
      * Update the cache for a specific role
      * @param {import("discord.js").Role} role
-     * @param {*} fetchOnlyThese
+     * @param {string[]} fetchOnlyThese
+     * @returns {import("./discord").RoleData}
      */
     async updateRoleCache(role, fetchOnlyThese) {
         // Fetch members and build cache
@@ -186,7 +187,8 @@ class DiscordUtility extends EventEmitter {
      * Get relevant analytics data for a specific role
      * @param {string} serverId The server id
      * @param {string} roleId The role id
-     * @param {Record<string, unknown>} fetchOnlyThese Fetch only these members
+     * @param {string[]} fetchOnlyThese Fetch only these members
+     * @returns {import("./discord").RoleData}
      */
     async getRoleData(
         serverId, roleId, fetchOnlyThese
@@ -237,8 +239,9 @@ class DiscordUtility extends EventEmitter {
 /**
  * Initialize the Discord client
  * @param {Database} database
+ * @returns {DiscordUtility}
  */
-module.exports = (database) => {
+module.exports.default = (database) => {
     client.on("interactionCreate", async (interaction) => {
         if (process.env.DEBUGGING) {
             interaction.deferReply = () => {} // Do nothing
@@ -327,3 +330,4 @@ module.exports = (database) => {
     client.login()
     return utilities
 }
+module.exports.DiscordUtility = DiscordUtility

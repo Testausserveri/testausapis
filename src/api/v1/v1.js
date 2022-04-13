@@ -1,7 +1,3 @@
-// Packages
-// eslint-disable-next-line no-unused-vars
-const { Request, Response, NextFunction } = require("express")
-
 // Configuration
 const mainServer = "697710787636101202"
 const address = process.env.HTTP_URL
@@ -16,14 +12,16 @@ const discord = require("./discord")
 const request = require("./request")
 const getQuery = require("./getQuery")
 
+/**
+ * @type {discord.DiscordUtility}
+ */
 let discordUtility // The Discord utility class
 let guildInfoCache = null
 
 // Initialize the Discord client & Database
 database.init().then(() => {
-    discordUtility = discord(database)
+    discordUtility = discord.default(database)
     console.log("Connected to the database!")
-    // TODO: Wait for ready, discord
     // Cache all role data on startup
     discordUtility.on("ready", () => {
         console.log("Caching role data...")
@@ -46,9 +44,9 @@ database.init().then(() => {
 
 /**
  * V1 API Handler
- * @param {Request} req
- * @param {Response} res
- * @param {NextFunction} next
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
  */
 module.exports = async (
     req, res, next
