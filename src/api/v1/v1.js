@@ -1,3 +1,4 @@
+/* eslint-disable import/extensions */
 // Configuration
 const mainServer = "697710787636101202"
 const address = process.env.HTTP_URL
@@ -7,10 +8,10 @@ const rolesWhitelistedForDataExport = ["743950610080071801"]
 const rolesWhitelistedForConsensualDataExport = ["839072621060423771", "755327895106486324"]
 
 // Internal dependencies
-const database = require("./database")
-const discord = require("./discord")
-const request = require("./request")
-const getQuery = require("./getQuery")
+const database = require("./database/database.js")
+const discord = require("./discord/discord.js")
+const request = require("./utils/request.js")
+const getQuery = require("./utils/getQuery.js")
 
 /**
  * @type {discord.DiscordUtility}
@@ -51,6 +52,11 @@ database.init().then(() => {
 module.exports = async (
     req, res, next
 ) => {
+    // Testaustime public leaderboard
+    if (req.method === "GET" && req.path === "/v1/codingLeaderboard") {
+        return res.json({})
+    }
+
     // Verify that we are ready to serve data
     if (discordUtility === undefined) return res.status(503).send("Service is getting ready...")
 

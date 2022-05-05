@@ -3,7 +3,7 @@ const {
 } = require("discord.js")
 const { EventEmitter } = require("events")
 const { inspect } = require("util")
-const request = require("./request")
+const request = require("../utils/request")
 
 const address = process.env.DEBUGGING ? "http://localhost:8080" : "https://api.testausserveri.fi"
 const discordConnectionsURL = `${address}/v1/discord/connections/authorize`
