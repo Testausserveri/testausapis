@@ -15,6 +15,8 @@ Testausapis provides API-endpoints for Testausserveri's general tasks, such as:
     + [GitHub](#github)
       - [GET `/v1/github/authorize`](#get-v1githubauthorize)
       - [GET `/v1/github/authorized`](#get-v1githubauthorized)
+    + [Misc](#misc)
+      - [GET `/v1/misc/codingLeaderboard`](#get-v1misccodingleaderboard)
   * [Models](#models)
     + [memberObject](#memberobject)
     + [cacheState](#cachestate)
@@ -86,6 +88,10 @@ Redirects the user to Github OAuth 2.0 authorization page to grant the API acces
 ##### GET `/v1/github/authorized`
 Handle the OAuth 2.0 callback from Github and add the user to the Testausserveri ry organization.
 
+#### Misc
+
+##### GET `/v1/misc/codingLeaderboard`
+Returns coding time leaderboard by fetching data from [Testaustime](https://testaustime.fi).
 ### Models
 
 #### memberObject

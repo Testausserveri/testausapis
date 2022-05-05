@@ -4,6 +4,7 @@
 const express = require("express")
 const discordRoute = require("./discord.js")
 const githubRoute = require("./github.js")
+const miscRoute = require("./misc.js")
 
 const database = require("./database/database.js")
 
@@ -16,9 +17,6 @@ const router = express.Router()
 
 router.use("/discord", discordRoute)
 router.use("/github", githubRoute)
-
-router.get("/codingLeaderboard", (req, res) => {
-    res.json({})
-})
+router.use("/misc", miscRoute)
 
 module.exports = router
