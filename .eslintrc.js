@@ -27,6 +27,7 @@ module.exports = {
         "operator-linebreak": ["error", "after"],
         "new-cap": ["error", { newIsCap: false }],
         "max-len": ["error", { code: 230 }],
-        "function-paren-newline": ["warn", { minItems: 3 }]
+        "function-paren-newline": ["warn", { minItems: 4 }],
+        "no-restricted-syntax": ["error", "LabeledStatement", "WithStatement"]
     }
 }
