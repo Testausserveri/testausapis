@@ -37,7 +37,7 @@ app.get("/", (_, res) => {
 })
 
 // API
-app.use(v1)
+app.use("/v1", v1)
 
 app.use((_, res) => {
     if (!res.headersSent) res.status(404).send("Not found.")
