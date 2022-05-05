@@ -1,4 +1,4 @@
-const { connect } = require("mongoose")
+const { connect, connection } = require("mongoose")
 
 const schemas = require("./schemas")
 
@@ -76,7 +76,9 @@ async function updateDataCollectionPolicy(
     if (mode === "remove") template.allowed.splice(template.allowed.indexOf(userId), 1)
     else if (mode === "add") template.allowed.push(userId)
     cache.dataCollectionPolicies[serverId] = template
-    return schemas.DataCollectionConfigurationModel.findOneAndUpdate({ id: serverId }, template, { upsert: true })
+    return schemas.DataCollectionConfigurationModel.findOneAndUpdate(
+        { id: serverId }, template, { upsert: true }
+    )
 }
 
 /**
@@ -140,5 +142,6 @@ module.exports = {
     removeUserInfo,
     getUserInfo,
     init,
-    getMessageCount
+    getMessageCount,
+    connection
 }
