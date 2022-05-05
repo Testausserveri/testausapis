@@ -1,13 +1,31 @@
 # Testausapis
-An API that provides analytics data from the Testausserveri Discord for the main page.
+Testausapis provides API-endpoints for Testausserveri's general tasks, such as:
+- GitHub organization self-service joining
+- Statistics and dynamic data for our [homepage](https://github.com/Testausserveri/testausserveri.fi)
 
-# API Documentation
-Root: `/*`
+## Table of Contents
+- [API Documentation](#api-documentation)
+  * [Routes](#routes)
+    + [Discord](#discord)
+      - [GET `/v1/discord/guildInfo`](#get---v1-discord-guildinfo-)
+      - [GET `/v1/discord/roleInfo`](#get---v1-discord-roleinfo-)
+      - [GET `/v1/discord/memberInfo`](#get---v1-discord-memberinfo-)
+      - [GET `/v1/discord/connections/authorize`](#get---v1-discord-connections-authorize-)
+      - [GET `/v1/discord/connections/authorized`](#get---v1-discord-connections-authorized-)
+    + [GitHub](#github)
+      - [GET `/v1/github/authorize`](#get---v1-github-authorize-)
+      - [GET `/v1/github/authorized`](#get---v1-github-authorized-)
+  * [Models](#models)
+    + [memberObject](#memberobject)
+    + [cacheState](#cachestate)
+## API Documentation
 
-## Version 1
-Root: `/v1/*`
+This is the API documentation for the current version 1. 
 
-### GET `/v1/discord/guildInfo`
+The base server url is `https://api.testausserveri.fi`. The API doesn't require authentication as it is currently purely for public open use.
+### Routes
+#### Discord
+##### GET `/v1/discord/guildInfo`
 Daily activity statistics of the Testausserveri.fi Discord server.
 Example response:
 
@@ -24,7 +42,7 @@ Access-Control-Allow-Origin: *
 
 *Values `N/A` when unavailable*
 
-### GET `/v1/discord/roleInfo`
+##### GET `/v1/discord/roleInfo`
 Get general information about a specific role.
 Role is specified with the query parameter `id` as the role id.
 This API publishes only otherwise public information.
@@ -49,28 +67,28 @@ Access-Control-Allow-Origin: *
 - "timestamp", Unix timestamp of the time of response generation
 - "cache", A cacheState (see below)
 
-### GET `/v1/discord/memberInfo`
+##### GET `/v1/discord/memberInfo`
 Get activity & general user information for a specific role.
 The role is specified with the query parameter `id` as the role id.
 This API publishes possibly private information and requires the users to opt-in for their data to be published.
 
 The response format is identical with /v1/discord/roleInfo
-
-### GET `/v1/discord/connections/authorize`
+##### GET `/v1/discord/connections/authorize`
 Redirects the user to the Discord OAuth 2.0 authorization page to grant the API access to account information.
 
-### GET `/v1/discord/connections/authorized`
+##### GET `/v1/discord/connections/authorized`
 Handle the OAuth 2.0 callback from Discord and update cached account information.
 
-### GET `/v1/github/authorize`
+#### GitHub
+##### GET `/v1/github/authorize`
 Redirects the user to Github OAuth 2.0 authorization page to grant the API access to account information.
 
-### GET `/v1/github/authorized`
+##### GET `/v1/github/authorized`
 Handle the OAuth 2.0 callback from Github and add the user to the Testausserveri ry organization.
 
-## Version 1 standards
+### Models
 
-### memberObject
+#### memberObject
 ```json
 {
     "name": Member account name,
@@ -121,7 +139,7 @@ Handle the OAuth 2.0 callback from Github and add the user to the Testausserveri
 
 *All values can be expected to be strings or numbers (if possible, excluding ids)*
 
-### cacheState
+#### cacheState
 A string value that can be any of these values:
 - "valid", The cache is up to date.
 - "expired", The cache has expired and contains expired data.
