@@ -35,22 +35,26 @@ async function getMessagesLeaderboard() {
  * Update the guildInfo cache
  */
 async function updateGuildInfoCache() {
-    const messagesToday = await database.getMessageCount(mainServer)
-    const memberCount = await discordUtility.getMemberCount(mainServer)
-    const membersOnline = await discordUtility.getOnlineCount(mainServer)
-    const config = await database.getDataCollectionConfig(mainServer)
-    const boostStatus = await discordUtility.getBoostStatus(mainServer, config?.allowed ?? [])
-    const codingLeaderboard = await getCodingLeaderboard()
-    const messagesLeaderboard = await getMessagesLeaderboard()
+    try {
+        const messagesToday = await database.getMessageCount(mainServer)
+        const memberCount = await discordUtility.getMemberCount(mainServer)
+        const membersOnline = await discordUtility.getOnlineCount(mainServer)
+        const config = await database.getDataCollectionConfig(mainServer)
+        const boostStatus = await discordUtility.getBoostStatus(mainServer, config?.allowed ?? [])
+        const codingLeaderboard = await getCodingLeaderboard()
+        const messagesLeaderboard = await getMessagesLeaderboard()
 
-    guildInfoCache = {
-        memberCount: memberCount ?? "N/A",
-        membersOnline: membersOnline ?? "N/A",
-        messagesToday: messagesToday ?? "N/A",
-        premium: boostStatus ?? { subscriptions: "N/A", trier: "N/A", subscribers: [] },
-        codingLeaderboard,
-        messagesLeaderboard,
-        timestamp: new Date().getTime()
+        guildInfoCache = {
+            memberCount: memberCount ?? "N/A",
+            membersOnline: membersOnline ?? "N/A",
+            messagesToday: messagesToday ?? "N/A",
+            premium: boostStatus ?? { subscriptions: "N/A", trier: "N/A", subscribers: [] },
+            codingLeaderboard,
+            messagesLeaderboard,
+            timestamp: new Date().getTime()
+        }
+    } catch (e) {
+        console.error("Failed to update guildInfo cache.", e)
     }
 }
 database.connection.once("open", () => {
@@ -67,7 +71,6 @@ database.connection.once("open", () => {
         if (!config) return console.warn("Data collection configuration for the main server does not exist. Unable to create caches.")
 
         const roles = [rolesWhitelistedForDataExport, rolesWhitelistedForConsensualDataExport].flat(1)
-        // eslint-disable-next-line no-restricted-syntax
         for (const id of roles) {
             discordUtility.getRoleData(mainServer, id, rolesWhitelistedForConsensualDataExport.includes(id) ? config.allowed : undefined)
         }

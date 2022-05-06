@@ -116,10 +116,8 @@ class DiscordUtility extends EventEmitter {
         // Fetch members and build cache
         let roleMembersToProcess = role.members
         if (fetchOnlyThese) roleMembersToProcess = roleMembersToProcess.filter((member) => fetchOnlyThese.includes(member.id))
-        // eslint-disable-next-line no-restricted-syntax
         for await (const member of roleMembersToProcess) await member[1].user.fetch() // Fetch all members
         const extraMemberData = {}
-        // eslint-disable-next-line no-restricted-syntax
         for await (const member of roleMembersToProcess) extraMemberData[member[0]] = (await this.database.getUserInfo(member[0]))
         return {
             name: role.name,
@@ -180,8 +178,13 @@ class DiscordUtility extends EventEmitter {
         }
     }
 
+    /**
+     * Get user info by id
+     * @param {string} userId
+     * @returns {Promise<import("discord.js").User>}
+     */
     getUserById(userId) {
-        return client.users.fetch(userId)
+        return client.users.fetch(userId, { cache: true })
     }
 
     /**
@@ -314,7 +317,6 @@ module.exports.default = (database) => {
 
     const utilities = new DiscordUtility(database)
     client.once("ready", async () => {
-        // eslint-disable-next-line no-restricted-syntax
         for await (const guild of client.guilds.cache) {
             await guild[1].commands.set(slashCommands)
         }

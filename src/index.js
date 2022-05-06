@@ -7,7 +7,6 @@ const v1 = require("./api/v1/v1")
 
 console.log(`Package: ${Package.name}@${Package.version}`)
 console.log(`Runtime: ${process.version}`)
-// eslint-disable-next-line new-cap
 console.log(`Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`)
 
 require("./console")() // Overwrites default console functions with better ones

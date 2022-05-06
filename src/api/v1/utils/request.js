@@ -92,7 +92,6 @@ module.exports = (
     })
 
     // Send headers
-    // eslint-disable-next-line no-restricted-syntax
     if (headers !== undefined && Object.keys(headers).length !== 0) for (const header of Object.keys(headers)) request.setHeader(header, headers[header])
     if (options?.overrideContentLength) request.setHeader("Content-Length", options.overrideContentLength)
     else if (body !== undefined && body.length > 0) {
