@@ -14,8 +14,8 @@ router.get("/codingLeaderboard", cache(7), async (req, res) => {
     const { members } = JSON.parse(data)
     const leaderboard = members
         .map((member) => ({
-            username: member.username,
-            time: member.time_coded
+            name: member.username,
+            value: member.time_coded
         }))
         .sort((a, b) => (b.time - a.time))
         .slice(0, 5)
