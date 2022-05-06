@@ -1,3 +1,4 @@
+/* eslint-disable no-return-await */
 /* eslint-disable no-console */
 /* eslint-disable consistent-return */
 /* eslint-disable import/extensions */
@@ -30,10 +31,10 @@ let guildInfoCache = null
  * @returns {Promise<Array>} Returns reformatted leaderboard-object
  */
 async function getMessagesLeaderboard() {
-    return Promise.allSettled((await testauskoiraDatabase.getMessagesLeaderboard()).map(async (item) => ({
+    return [...await (Promise.allSettled((await testauskoiraDatabase.getMessagesLeaderboard()).map(async (item) => ({
         name: (await discordUtility.getUserById(item.userid)).username,
         value: item.message_count
-    }))).map((item) => item.value)
+    }))))].map((item) => item.value)
 }
 
 async function updateGuildInfoCache() {
