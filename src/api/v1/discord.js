@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable consistent-return */
 /* eslint-disable import/extensions */
 /* eslint-disable new-cap */
@@ -7,6 +8,8 @@ const database = require("./database/database.js")
 const discord = require("./discord/discord.js")
 const request = require("./utils/request.js")
 const getQuery = require("./utils/getQuery.js")
+const testauskoiraDatabase = require("./testauskoira/database.js")
+const getCodingLeaderboard = require("./utils/getCodingLeaderboard.js")
 
 const address = process.env.HTTP_URL
 const rolesWhitelistedForDataExport = ["743950610080071801"]
@@ -15,15 +18,54 @@ const discordCallback = `${address}/v1/discord/connections/authorized`
 const mainServer = "697710787636101202"
 
 const router = express.Router()
+testauskoiraDatabase.connect()
 
-let guildInfoCache = null
 let discordUtility // The Discord utility class
 
+const liveCacheTTL = 5000
+let guildInfoCache = null
+
+/**
+ * Get messages leaderboard and match userids' with their usernames
+ * @returns {Promise<Array>} Returns reformatted leaderboard-object
+ */
+async function getMessagesLeaderboard() {
+    return Promise.allSettled((await testauskoiraDatabase.getMessagesLeaderboard()).map(async (item) => ({
+        name: (await discordUtility.getUserById(item.userid)).username,
+        value: item.message_count
+    })))
+}
+
+async function updateGuildInfoCache() {
+    console.time("updating")
+    const messagesToday = await database.getMessageCount(mainServer)
+    const memberCount = await discordUtility.getMemberCount(mainServer)
+    const membersOnline = await discordUtility.getOnlineCount(mainServer)
+    const config = await database.getDataCollectionConfig(mainServer)
+    const boostStatus = await discordUtility.getBoostStatus(mainServer, config?.allowed ?? [])
+    const codingLeaderboard = await getCodingLeaderboard()
+    const messagesLeaderboard = await getMessagesLeaderboard()
+
+    guildInfoCache = {
+        memberCount: memberCount ?? "N/A",
+        membersOnline: membersOnline ?? "N/A",
+        messagesToday: messagesToday ?? "N/A",
+        premium: boostStatus ?? { subscriptions: "N/A", trier: "N/A", subscribers: [] },
+        codingLeaderboard,
+        messagesLeaderboard,
+        timestamp: new Date().getTime()
+    }
+
+    console.timeEnd("updating")
+}
 database.connection.once("open", () => {
     discordUtility = discord.default(database)
 
     // Cache all role data on startup
     discordUtility.on("ready", async () => {
+        setInterval(updateGuildInfoCache, liveCacheTTL)
+        updateGuildInfoCache()
+
         console.log("Caching role data...")
 
         const config = await database.getDataCollectionConfig(mainServer)
@@ -43,21 +85,13 @@ router.use((req, res, next) => {
 })
 
 router.get("/guildInfo", async (req, res) => {
-    if (guildInfoCache && guildInfoCache.timestamp + 5000 > new Date().getTime()) return res.json({ cache: "valid", ...guildInfoCache })
-    if (guildInfoCache) res.json({ cache: "expired-updating", ...guildInfoCache })
-    const messagesToday = await database.getMessageCount(mainServer)
-    const config = await database.getDataCollectionConfig(mainServer)
-    const memberCount = await discordUtility.getMemberCount(mainServer)
-    const membersOnline = await discordUtility.getOnlineCount(mainServer)
-    const boostStatus = await discordUtility.getBoostStatus(mainServer, config?.allowed ?? [])
-    guildInfoCache = {
-        memberCount: memberCount ?? "N/A",
-        membersOnline: membersOnline ?? "N/A",
-        messagesToday: messagesToday ?? "N/A",
-        premium: boostStatus ?? { subscriptions: "N/A", trier: "N/A", subscribers: [] },
-        timestamp: new Date().getTime()
-    }
-    return !res.headersSent ? res.json({ cache: "valid", ...guildInfoCache }) : null
+    if (!guildInfoCache) return res.status(503).json({ error: "Service Unavailable" })
+
+    const guildInfo = req.query.r ? Object.keys(guildInfoCache)
+        .filter((key) => req.query.r.split(",").includes(key))
+        .reduce((obj, key) => (Object.assign(obj, { [key]: guildInfoCache[key] })), {}) : guildInfoCache
+
+    res.json(guildInfo)
 })
 
 router.get("/roleInfo", async (req, res) => {

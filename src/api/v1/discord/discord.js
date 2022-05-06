@@ -34,9 +34,7 @@ async function updateDiscordApplicationsCache() {
                     authors:
                     [application.developers ? application.developers.map((developer) => developer.name) : []]
                         .concat(application.publishers ? application.publishers.map((publisher) => publisher.name) : [])
-                        .flat(2).filter((
-                            val, index, ar
-                        ) => ar.map((name) => name.toLowerCase()).indexOf(val.toLowerCase()) === index)
+                        .flat(2).filter((val, index, ar) => ar.map((name) => name.toLowerCase()).indexOf(val.toLowerCase()) === index)
                 }
             ]))
         if (JSON.stringify(discordDetectable) !== JSON.stringify(data)) {
@@ -183,6 +181,10 @@ class DiscordUtility extends EventEmitter {
         }
     }
 
+    getUserById(userid) {
+        return client.users.fetch(userid)
+    }
+
     /**
      * Get relevant analytics data for a specific role
      * @param {string} serverId The server id
@@ -190,9 +192,7 @@ class DiscordUtility extends EventEmitter {
      * @param {string[]} fetchOnlyThese Fetch only these members
      * @returns {import("./discord").RoleData}
      */
-    async getRoleData(
-        serverId, roleId, fetchOnlyThese
-    ) {
+    async getRoleData(serverId, roleId, fetchOnlyThese) {
         const role = await (await client.guilds.fetch(serverId)).roles.fetch(roleId)
         if (role === null) return null
         let response
@@ -261,9 +261,7 @@ module.exports.default = (database) => {
                     // Handle analytics commands
                     if (["allow", "deny"].includes(interaction.options.getSubcommand())) {
                         await interaction.deferReply({ ephemeral: true })
-                        await database.updateDataCollectionPolicy(
-                            interaction.options.getSubcommand() === "allow" ? "add" : "remove", interaction.guild.id, interaction.member.id
-                        )
+                        await database.updateDataCollectionPolicy(interaction.options.getSubcommand() === "allow" ? "add" : "remove", interaction.guild.id, interaction.member.id)
                         await interaction.followUp({
                             content: `Your data collection policy was set to \`${interaction.options.getSubcommand() === "allow" ? "Allowed" : "Denied"}\``,
                             ephemeral: true
@@ -280,9 +278,7 @@ module.exports.default = (database) => {
                     // Handle profile management commands
                     if (interaction.options.getSubcommand() === "bio") {
                         await interaction.deferReply({ ephemeral: true })
-                        await database.setUserInfo(
-                            interaction.user.id, interaction.options.get("text").value, undefined
-                        )
+                        await database.setUserInfo(interaction.user.id, interaction.options.get("text").value, undefined)
                         await interaction.followUp({
                             content: "Profile bio set!",
                             ephemeral: true
