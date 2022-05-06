@@ -181,8 +181,8 @@ class DiscordUtility extends EventEmitter {
         }
     }
 
-    getUserById(userid) {
-        return client.users.fetch(userid)
+    getUserById(userId) {
+        return client.users.fetch(userId)
     }
 
     /**

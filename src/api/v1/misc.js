@@ -1,9 +1,6 @@
-/* eslint-disable import/extensions */
-/* eslint-disable new-cap */
-
 const express = require("express")
-const request = require("./utils/request.js")
-const cache = require("./utils/cache.js")
+const request = require("./utils/request")
+const cache = require("./utils/cache")
 
 const router = express.Router()
 

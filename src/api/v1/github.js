@@ -1,8 +1,6 @@
-/* eslint-disable import/extensions */
-/* eslint-disable new-cap */
 const express = require("express")
-const request = require("./utils/request.js")
-const getQuery = require("./utils/getQuery.js")
+const request = require("./utils/request")
+const getQuery = require("./utils/getQuery")
 
 const address = process.env.HTTP_URL
 const githubCallback = `${address}/v1/github/authorized`

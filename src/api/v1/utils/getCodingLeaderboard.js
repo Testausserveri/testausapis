@@ -1,5 +1,4 @@
-/* eslint-disable import/extensions */
-const request = require("./request.js")
+const request = require("./request")
 
 async function getCodingLeaderboard() {
     const { data } = await request("GET", "https://api.testaustime.fi/leaderboards/balls", {

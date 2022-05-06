@@ -1,6 +1,4 @@
-/* eslint-disable import/extensions */
 const mariadb = require("mariadb")
-const discord = require("../discord/discord.js")
 
 let connection
 
