@@ -36,21 +36,24 @@ async function getMessagesLeaderboard() {
  */
 async function updateGuildInfoCache() {
     try {
-        const messagesToday = await database.getMessageCount(mainServer)
-        const memberCount = await discordUtility.getMemberCount(mainServer)
-        const membersOnline = await discordUtility.getOnlineCount(mainServer)
-        const config = await database.getDataCollectionConfig(mainServer)
-        const boostStatus = await discordUtility.getBoostStatus(mainServer, config?.allowed ?? [])
-        const codingLeaderboard = await getCodingLeaderboard()
-        const messagesLeaderboard = await getMessagesLeaderboard()
+        const config = await database.getDataCollectionConfig(mainServer) // We'll keep this here
+        const data = await Promise.all([
+            database.getMessageCount(mainServer),
+            discordUtility.getMemberCount(mainServer),
+            discordUtility.getOnlineCount(mainServer),
+            database.getDataCollectionConfig(mainServer),
+            discordUtility.getBoostStatus(mainServer, config?.allowed ?? []),
+            getCodingLeaderboard(),
+            getMessagesLeaderboard()
+        ])
 
         guildInfoCache = {
-            memberCount: memberCount ?? "N/A",
-            membersOnline: membersOnline ?? "N/A",
-            messagesToday: messagesToday ?? "N/A",
-            premium: boostStatus ?? { subscriptions: "N/A", trier: "N/A", subscribers: [] },
-            codingLeaderboard,
-            messagesLeaderboard,
+            memberCount: data[1] ?? "N/A",
+            membersOnline: data[2] ?? "N/A",
+            messagesToday: data[0] ?? "N/A",
+            premium: data[4] ?? { subscriptions: "N/A", trier: "N/A", subscribers: [] },
+            codingLeaderboard: data[5],
+            messagesLeaderboard: data[6],
             timestamp: new Date().getTime()
         }
     } catch (e) {
