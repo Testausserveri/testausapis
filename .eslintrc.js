@@ -29,7 +29,7 @@ module.exports = {
         "max-len": ["error", { code: 230 }],
         "function-paren-newline": ["warn", { minItems: 4 }],
         "no-restricted-syntax": ["error", "LabeledStatement", "WithStatement"],
-        "class-methods-use-this": "warn",
+        "class-methods-use-this": "off",
         "consistent-return": "warn"
     }
 }

@@ -67,7 +67,6 @@ class DiscordUtility extends EventEmitter {
      * @param {string} id The server id
      * @returns {Promise<string | null>}
      */
-    // eslint-disable-next-line class-methods-use-this
     async getMemberCount(id) {
         return (await client.guilds.fetch(id))?.memberCount
     }
@@ -77,10 +76,8 @@ class DiscordUtility extends EventEmitter {
      * @param {string} id
      * @returns {Promise<string | null>}
      */
-    // eslint-disable-next-line class-methods-use-this
     async getOnlineCount(id) {
-        const guild = await client.guilds.fetch(id)
-        return guild !== null ? (await guild.members.fetch()).filter((member) => member.user.bot === false && member?.presence?.status !== "offline").size : null
+        return (await client.guilds.fetch(id)).approximatePresenceCount
     }
 
     /**
@@ -89,7 +86,6 @@ class DiscordUtility extends EventEmitter {
      * @param {string[]} fetchOnlyThese Only fetch these members
      * @returns {Promise<{ subscriptions: number, tier: number } | null>}
      */
-    // eslint-disable-next-line class-methods-use-this
     async getBoostStatus(id, fetchOnlyThese) {
         const guild = await client.guilds.fetch(id)
         return guild !== null ? {
