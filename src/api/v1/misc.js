@@ -17,7 +17,7 @@ router.get("/codingLeaderboard", cache(7), async (req, res) => {
             name: member.username,
             value: member.time_coded
         }))
-        .sort((a, b) => (b.time - a.time))
+        .sort((a, b) => (b.value - a.value))
         .slice(0, 5)
 
     res.json(leaderboard)
