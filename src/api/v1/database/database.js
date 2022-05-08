@@ -27,7 +27,7 @@ async function incrementMessageCount(id) {
             template.count = 0
         } else template.count = (typeof server.count === "number" ? server.count : 0) + 1
     }
-    cache.messageCounts[id] = { timestamp: new Date().getTime(), count: server.count }
+    cache.messageCounts[id] = { timestamp: new Date().getTime(), count: template.count }
     await schemas.MessageCountModel.findOneAndUpdate({ id }, template, { upsert: true })
 }
 
