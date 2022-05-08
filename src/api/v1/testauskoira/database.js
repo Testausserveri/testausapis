@@ -1,12 +1,12 @@
+/* eslint-disable max-len */
 /* eslint-disable import/extensions */
 const mariadb = require("mariadb")
-const discord = require("../discord/discord.js")
 
 let connection
 
 async function getMessagesLeaderboard() {
     try {
-        const data = await connection.query("SELECT `userid`, `message_count` FROM `messages_day_stat` WHERE `date` = subdate(current_date, 1) ORDER BY `message_count` DESC LIMIT 5")
+        const data = await connection.query("SELECT `userid`, SUM(`message_count`) as 'message_count' FROM `messages_day_stat` WHERE (`date` between date_sub(now(),INTERVAL 1 WEEK) and now()) GROUP BY `userid` ORDER BY `message_count` DESC LIMIT 5")
         return [...data]
     } catch {
         return []
