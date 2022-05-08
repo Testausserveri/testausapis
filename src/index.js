@@ -7,10 +7,9 @@ const v1 = require("./api/v1/v1")
 
 console.log(`Package: ${Package.name}@${Package.version}`)
 console.log(`Runtime: ${process.version}`)
-// eslint-disable-next-line new-cap
 console.log(`Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`)
 
-require("./console")()
+require("./console")() // Overwrites default console functions with better ones
 
 if (process.env.DEBUGGING) console.warn("DEBUGGING MODE IS ACTIVE! DISCORD INTERACTIONS WILL BE IGNORED!")
 
@@ -18,9 +17,7 @@ if (process.env.DEBUGGING) console.warn("DEBUGGING MODE IS ACTIVE! DISCORD INTER
 const app = express()
 
 // Webserver
-app.use((
-    _, res, next
-) => { // Allow everyone for CORS
+app.use((_, res, next) => { // Allow everyone for CORS
     res.setHeader("Access-Control-Allow-Origin", "*")
     next()
 })

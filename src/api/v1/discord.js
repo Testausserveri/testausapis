@@ -1,16 +1,10 @@
-/* eslint-disable no-return-await */
-/* eslint-disable no-console */
-/* eslint-disable consistent-return */
-/* eslint-disable import/extensions */
-/* eslint-disable new-cap */
-
 const express = require("express")
-const database = require("./database/database.js")
-const discord = require("./discord/discord.js")
-const request = require("./utils/request.js")
-const getQuery = require("./utils/getQuery.js")
-const testauskoiraDatabase = require("./testauskoira/database.js")
-const getCodingLeaderboard = require("./utils/getCodingLeaderboard.js")
+const database = require("./database/database")
+const discord = require("./discord/discord")
+const request = require("./utils/request")
+const getQuery = require("./utils/getQuery")
+const testauskoiraDatabase = require("./testauskoira/database")
+const getCodingLeaderboard = require("./utils/getCodingLeaderboard")
 
 const address = process.env.HTTP_URL
 const rolesWhitelistedForDataExport = ["743950610080071801"]
@@ -37,27 +31,34 @@ async function getMessagesLeaderboard() {
     }))))].map((item) => item.value)
 }
 
+/**
+ * Update the guildInfo cache
+ */
 async function updateGuildInfoCache() {
-    console.time("updating")
-    const messagesToday = await database.getMessageCount(mainServer)
-    const memberCount = await discordUtility.getMemberCount(mainServer)
-    const membersOnline = await discordUtility.getOnlineCount(mainServer)
-    const config = await database.getDataCollectionConfig(mainServer)
-    const boostStatus = await discordUtility.getBoostStatus(mainServer, config?.allowed ?? [])
-    const codingLeaderboard = await getCodingLeaderboard()
-    const messagesLeaderboard = await getMessagesLeaderboard()
+    try {
+        const config = await database.getDataCollectionConfig(mainServer) // We'll keep this here
+        const data = await Promise.all([
+            database.getMessageCount(mainServer),
+            discordUtility.getMemberCount(mainServer),
+            discordUtility.getOnlineCount(mainServer),
+            database.getDataCollectionConfig(mainServer),
+            discordUtility.getBoostStatus(mainServer, config?.allowed ?? []),
+            getCodingLeaderboard(),
+            getMessagesLeaderboard()
+        ])
 
-    guildInfoCache = {
-        memberCount: memberCount ?? "N/A",
-        membersOnline: membersOnline ?? "N/A",
-        messagesToday: messagesToday ?? "N/A",
-        premium: boostStatus ?? { subscriptions: "N/A", trier: "N/A", subscribers: [] },
-        codingLeaderboard,
-        messagesLeaderboard,
-        timestamp: new Date().getTime()
+        guildInfoCache = {
+            memberCount: data[1] ?? "N/A",
+            membersOnline: data[2] ?? "N/A",
+            messagesToday: data[0] ?? "N/A",
+            premium: data[4] ?? { subscriptions: "N/A", trier: "N/A", subscribers: [] },
+            codingLeaderboard: data[5],
+            messagesLeaderboard: data[6],
+            timestamp: new Date().getTime()
+        }
+    } catch (e) {
+        console.error("Failed to update guildInfo cache.", e)
     }
-
-    console.timeEnd("updating")
 }
 database.connection.once("open", () => {
     discordUtility = discord.default(database)
@@ -73,16 +74,16 @@ database.connection.once("open", () => {
         if (!config) return console.warn("Data collection configuration for the main server does not exist. Unable to create caches.")
 
         const roles = [rolesWhitelistedForDataExport, rolesWhitelistedForConsensualDataExport].flat(1)
-        // eslint-disable-next-line no-restricted-syntax
         for (const id of roles) {
             discordUtility.getRoleData(mainServer, id, rolesWhitelistedForConsensualDataExport.includes(id) ? config.allowed : undefined)
         }
     })
 })
+
 // Middleware to check ready-state for Discord-related routes
-router.use((req, res, next) => {
-    if (discordUtility === undefined) return res.status(503).send("Service is getting ready...")
-    next()
+router.use((_, res, next) => {
+    if (discordUtility === undefined) return res.status(503).json({ error: "Service is getting ready" })
+    return next()
 })
 
 router.get("/guildInfo", async (req, res) => {
@@ -92,38 +93,38 @@ router.get("/guildInfo", async (req, res) => {
         .filter((key) => req.query.r.split(",").includes(key))
         .reduce((obj, key) => (Object.assign(obj, { [key]: guildInfoCache[key] })), {}) : guildInfoCache
 
-    res.json(guildInfo)
+    return res.json(guildInfo)
 })
 
 router.get("/roleInfo", async (req, res) => {
-    if (![rolesWhitelistedForConsensualDataExport, rolesWhitelistedForDataExport].flat(1).includes(req.query.id)) return res.status(401).send("Private role data.")
-    if (!req.query.id) return res.status(400).send("Please specify a role id in the query.")
+    if (![rolesWhitelistedForConsensualDataExport, rolesWhitelistedForDataExport].flat(1).includes(req.query.id)) return res.status(401).json({ error: "Private role data." })
+    if (!req.query.id) return res.status(400).json({ error: "Please specify a role id in the query." })
     const role = await discordUtility.getRoleData(mainServer, req.query.id, [])
     delete role.members
-    if (role === null) return res.status(404).send("No such role or cache miss.")
+    if (role === null) return res.status(404).json({ error: "No such role or cache miss." })
     return res.json(role)
 })
 
 router.get("/memberInfo", async (req, res) => {
-    if (!req.query.role) return res.status(400).send("Please specify a role id (as role) in the query.")
+    if (!req.query.role) return res.status(400).json({ error: "Please specify a role id (as role) in the query." })
     let role
     if (rolesWhitelistedForDataExport.includes(req.query.role)) {
         // Public data
         role = await discordUtility.getRoleData(mainServer, req.query.role)
-        if (role === null) return res.status(404).send("No such role or cache miss.")
+        if (role === null) return res.status(404).json({ error: "No such role or cache miss." })
     } else {
         // Requires consent
-        if (!rolesWhitelistedForConsensualDataExport.includes(req.query.role)) return res.status(400).send("Private role data.")
+        if (!rolesWhitelistedForConsensualDataExport.includes(req.query.role)) return res.json({ error: "Private role data." })
         const config = await database.getDataCollectionConfig(mainServer)
-        if (config === null) return res.status(401).send("No public role data available.")
+        if (config === null) return res.status(401).json({ error: "No private role data available." })
         role = await discordUtility.getRoleData(mainServer, req.query.role, config.allowed)
-        if (role === null) return res.status(404).send("No such role or cache miss.")
+        if (role === null) return res.status(404).json({ error: "No such role or cache miss." })
         role.members = role.members.filter((member) => config.allowed.includes(member.id)) // TODO: Is this needed?
     }
     return res.json(role)
 })
 
-router.get("/connections/authorize", async (req, res) => {
+router.get("/connections/authorize", async (_, res) => {
     res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${process.env.DISCORD_CLIENT_ID}&response_type=code&scope=identify%20connections&redirect_uri=${discordCallback}`)
 })
 

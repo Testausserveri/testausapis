@@ -42,11 +42,11 @@ const protocols = {
 
 /**
  * Perform a simple HTTP request
- * @param {requestMethod} method
- * @param {string} url
- * @param {Object} headers
- * @param {string|Buffer|undefined} body
- * @param {requestOptions} options
+ * @param {requestMethod} method The request method. Example: POST or GET.
+ * @param {string} url The URL of the request
+ * @param {Object} headers The request headers as JSON
+ * @param {string|Buffer|undefined} body The request body
+ * @param {requestOptions} options Special request options
  * @returns {Promise<requestResponse>}
  */
 module.exports = (
@@ -81,20 +81,17 @@ module.exports = (
     }
 
     // Do the request
-    const request = library.request(
-        urlInstance, { method }, (res) => {
-            const buffer = []
-            res.on("data", (chunk) => buffer.push(chunk))
-            res.once("end", () => resolve({
-                status: res.statusCode,
-                headers: res.headers,
-                data: options?.stringify === false ? Buffer.concat(buffer) : Buffer.concat(buffer).toString()
-            }))
-        }
-    )
+    const request = library.request(urlInstance, { method }, (res) => {
+        const buffer = []
+        res.on("data", (chunk) => buffer.push(chunk))
+        res.once("end", () => resolve({
+            status: res.statusCode,
+            headers: res.headers,
+            data: options?.stringify === false ? Buffer.concat(buffer) : Buffer.concat(buffer).toString()
+        }))
+    })
 
     // Send headers
-    // eslint-disable-next-line no-restricted-syntax
     if (headers !== undefined && Object.keys(headers).length !== 0) for (const header of Object.keys(headers)) request.setHeader(header, headers[header])
     if (options?.overrideContentLength) request.setHeader("Content-Length", options.overrideContentLength)
     else if (body !== undefined && body.length > 0) {

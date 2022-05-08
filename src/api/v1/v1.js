@@ -1,12 +1,9 @@
-/* eslint-disable import/extensions */
-/* eslint-disable new-cap */
-
 const express = require("express")
-const discordRoute = require("./discord.js")
-const githubRoute = require("./github.js")
-const miscRoute = require("./misc.js")
+const discordRoute = require("./discord")
+const githubRoute = require("./github")
+const miscRoute = require("./misc")
 
-const database = require("./database/database.js")
+const database = require("./database/database")
 
 database.init()
     .catch((e) => {

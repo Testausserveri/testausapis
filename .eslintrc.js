@@ -25,9 +25,11 @@ module.exports = {
         "no-param-reassign": ["error", { props: false }],
         "no-console": ["error", { allow: ["warn", "log", "error", "debug"] }],
         "operator-linebreak": ["error", "after"],
-        "new-cap": ["error", { newIsCap: false }],
+        "new-cap": ["warn", { newIsCap: false }],
         "max-len": ["error", { code: 230 }],
         "function-paren-newline": ["warn", { minItems: 4 }],
-        "no-restricted-syntax": ["error", "LabeledStatement", "WithStatement"]
+        "no-restricted-syntax": ["error", "LabeledStatement", "WithStatement"],
+        "class-methods-use-this": "off",
+        "consistent-return": "warn"
     }
 }

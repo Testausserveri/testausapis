@@ -1,10 +1,14 @@
-/* eslint-disable import/extensions */
-const request = require("./request.js")
+const request = require("./request")
 
-async function getCodingLeaderboard() {
-    const { data } = await request("GET", "https://api.testaustime.fi/leaderboards/balls", {
+/**
+ * Get the coding leaderboard
+ * @returns {{ name: string, value: string }[]}
+ */
+module.exports = async () => {
+    const { data, status } = await request("GET", "https://api.testaustime.fi/leaderboards/balls", {
         Authorization: `Bearer ${process.env.TESTAUSTIME_TOKEN}`
     })
+    if (status !== 200) throw new Error(`Failed to fetch leaderboard from Testaustime: ${JSON.stringify(data)}`)
     const { members } = JSON.parse(data)
     const leaderboard = members
         .map((member) => ({
@@ -16,5 +20,3 @@ async function getCodingLeaderboard() {
 
     return leaderboard
 }
-
-module.exports = getCodingLeaderboard

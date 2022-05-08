@@ -39,7 +39,7 @@ global.consoleConfig = {
 }
 
 module.exports = () => {
-    // eslint-disable-next-line no-restricted-syntax, guard-for-in
+    // eslint-disable-next-line guard-for-in
     for (const func in global.consoleConfig) {
         const real = console[func]
         console[func] = async (...args) => { // A proxy

@@ -67,7 +67,6 @@ class DiscordUtility extends EventEmitter {
      * @param {string} id The server id
      * @returns {Promise<string | null>}
      */
-    // eslint-disable-next-line class-methods-use-this
     async getMemberCount(id) {
         return (await client.guilds.fetch(id))?.memberCount
     }
@@ -77,10 +76,11 @@ class DiscordUtility extends EventEmitter {
      * @param {string} id
      * @returns {Promise<string | null>}
      */
-    // eslint-disable-next-line class-methods-use-this
     async getOnlineCount(id) {
-        const guild = await client.guilds.fetch(id)
-        return guild !== null ? (await guild.members.fetch()).filter((member) => member.user.bot === false && member?.presence?.status !== "offline").size : null
+        return (await client.guilds.fetch(id)).approximatePresenceCount ??
+                // Legacy way of getting the data, if the above fails
+                (await (await client.guilds.fetch(id)).members.fetch({ withPresences: true }))
+                    .filter((member) => member.user.bot === false && typeof member?.presence?.status === "string" && member?.presence?.status !== "offline").size
     }
 
     /**
@@ -89,7 +89,6 @@ class DiscordUtility extends EventEmitter {
      * @param {string[]} fetchOnlyThese Only fetch these members
      * @returns {Promise<{ subscriptions: number, tier: number } | null>}
      */
-    // eslint-disable-next-line class-methods-use-this
     async getBoostStatus(id, fetchOnlyThese) {
         const guild = await client.guilds.fetch(id)
         return guild !== null ? {
@@ -117,10 +116,8 @@ class DiscordUtility extends EventEmitter {
         // Fetch members and build cache
         let roleMembersToProcess = role.members
         if (fetchOnlyThese) roleMembersToProcess = roleMembersToProcess.filter((member) => fetchOnlyThese.includes(member.id))
-        // eslint-disable-next-line no-restricted-syntax
         for await (const member of roleMembersToProcess) await member[1].user.fetch() // Fetch all members
         const extraMemberData = {}
-        // eslint-disable-next-line no-restricted-syntax
         for await (const member of roleMembersToProcess) extraMemberData[member[0]] = (await this.database.getUserInfo(member[0]))
         return {
             name: role.name,
@@ -181,8 +178,13 @@ class DiscordUtility extends EventEmitter {
         }
     }
 
-    getUserById(userid) {
-        return client.users.fetch(userid)
+    /**
+     * Get user info by id
+     * @param {string} userId
+     * @returns {Promise<import("discord.js").User>}
+     */
+    getUserById(userId) {
+        return client.users.fetch(userId, { cache: true })
     }
 
     /**
@@ -315,7 +317,6 @@ module.exports.default = (database) => {
 
     const utilities = new DiscordUtility(database)
     client.once("ready", async () => {
-        // eslint-disable-next-line no-restricted-syntax
         for await (const guild of client.guilds.cache) {
             await guild[1].commands.set(slashCommands)
         }
