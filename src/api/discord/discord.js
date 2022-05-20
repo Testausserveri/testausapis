@@ -318,7 +318,7 @@ module.exports.default = (database) => {
     const utilities = new DiscordUtility(database)
     client.once("ready", async () => {
         for await (const guild of client.guilds.cache) {
-            await guild[1].commands.set(slashCommands)
+            // await guild[1].commands.set(slashCommands)
         }
         utilities.emit("ready")
         utilities.ready = true

@@ -4,7 +4,7 @@ dotenv.config()
 
 import express from "express"
 import Package from "../package.json"
-import apiV1Route from "./api/v1/index.js"
+import apiRoute from "./api/index.js"
 
 console.log(`Package: ${Package.name}@${Package.version}`)
 console.log(`Runtime: ${process.version}`)
@@ -13,10 +13,12 @@ console.log(`Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`)
 if (process.env.DEBUGGING) console.warn("DEBUGGING MODE IS ACTIVE! DISCORD INTERACTIONS WILL BE IGNORED!")
 
 const app = express()
+
 app.use((_, res, next) => { // Allow everyone for CORS
     res.setHeader("Access-Control-Allow-Origin", "*")
     next()
 })
+
 app.get("/", (_, res) => {
     res.status(200).json({
         name: Package.name,
@@ -28,7 +30,7 @@ app.get("/", (_, res) => {
     })
 })
 
-app.use("/v1", apiV1Route)
+app.use("/v1", apiRoute)
 
 app.use((_, res) => {
     if (!res.headersSent) res.status(404).json({error: "What?"})
