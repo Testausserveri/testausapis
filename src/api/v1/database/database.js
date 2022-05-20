@@ -1,11 +1,14 @@
 /* eslint-disable function-paren-newline */
+import mongoose from "mongoose"
+const { connect, connection, model }= mongoose
 
-import { connect, connection, model } from "mongoose"
+import dotenv from "dotenv"
+dotenv.config()
 
-import SchemaDataCollectionConfiguration from "./schemas/dataCollectionConfiguration"
-import SchemaMessageCount from "./schemas/messageCount"
-import SchemaProjects from "./schemas/projects"
-import SchemaUserInfo from "./schemas/userInfo"
+import SchemaDataCollectionConfiguration from "./schemas/dataCollectionConfiguration.js"
+import SchemaMessageCount from "./schemas/messageCount.js"
+import SchemaProjects from "./schemas/projects.js"
+import SchemaUserInfo from "./schemas/userInfo.js"
 
 /**
  * Initialize a database connection

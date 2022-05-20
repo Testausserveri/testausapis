@@ -1,27 +1,23 @@
-require("dotenv").config()
+import "./console.js"
+import dotenv from "dotenv"
+dotenv.config()
 
-// Imports
-const express = require("express")
-const Package = require("../package.json")
-const v1 = require("./api/v1/v1")
+import express from "express"
+import * as Package from "../package.json"
+
+import apiV1Route from "./api/v1/index.js"
 
 console.log(`Package: ${Package.name}@${Package.version}`)
 console.log(`Runtime: ${process.version}`)
 console.log(`Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`)
 
-require("./console")() // Overwrites default console functions with better ones
-
 if (process.env.DEBUGGING) console.warn("DEBUGGING MODE IS ACTIVE! DISCORD INTERACTIONS WILL BE IGNORED!")
 
-// Initialization
 const app = express()
-
-// Webserver
 app.use((_, res, next) => { // Allow everyone for CORS
     res.setHeader("Access-Control-Allow-Origin", "*")
     next()
 })
-
 app.get("/", (_, res) => {
     res.status(200).json({
         name: Package.name,
@@ -33,11 +29,10 @@ app.get("/", (_, res) => {
     })
 })
 
-// API
-app.use("/v1", v1)
+app.use("/v1", apiV1Route)
 
 app.use((_, res) => {
-    if (!res.headersSent) res.status(404).send("Not found.")
+    if (!res.headersSent) res.status(404).json({error: "What?"})
 })
 
 const port = process.env.HTTP_PORT || 8080
