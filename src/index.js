@@ -3,8 +3,7 @@ import dotenv from "dotenv"
 dotenv.config()
 
 import express from "express"
-import * as Package from "../package.json"
-
+import Package from "../package.json"
 import apiV1Route from "./api/v1/index.js"
 
 console.log(`Package: ${Package.name}@${Package.version}`)
