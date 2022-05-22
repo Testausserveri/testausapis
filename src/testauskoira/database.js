@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 /* eslint-disable import/extensions */
-const mariadb = require("mariadb")
+import mariadb from "mariadb";
 
 let connection
 
@@ -23,7 +23,7 @@ async function connect() {
     }
 }
 
-module.exports = {
+export default {
     connect,
     getMessagesLeaderboard
 }

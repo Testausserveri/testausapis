@@ -1,6 +1,6 @@
-const express = require("express")
-const request = require("./utils/request")
-const getQuery = require("./utils/getQuery")
+import express from "express"
+import request from "./utils/request.js"
+import getQuery from "./utils/getQuery.js"
 
 const address = process.env.HTTP_URL
 const githubCallback = `${address}/v1/github/authorized`
@@ -87,4 +87,4 @@ router.get("/authorized", async (req, res) => {
     return res.redirect("https://testausserveri.fi/githubJoined")
 })
 
-module.exports = router
+export default router

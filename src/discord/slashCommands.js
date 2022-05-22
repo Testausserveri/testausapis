@@ -1,7 +1,7 @@
 /**
  * Default slash commands configuration
  */
-module.exports = [
+export default [
     {
         name: "analytics",
         description: "Manage the collection of your \"Discord Data\" by Testausserveri ry.",

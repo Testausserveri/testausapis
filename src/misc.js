@@ -1,6 +1,7 @@
-const express = require("express")
-const request = require("./utils/request")
-const cache = require("./utils/cache")
+import express from "express"
+
+import request from "./utils/request.js"
+import cache from "./utils/cache.js"
 
 const router = express.Router()
 
@@ -20,4 +21,4 @@ router.get("/codingLeaderboard", cache(7), async (req, res) => {
     res.json(leaderboard)
 })
 
-module.exports = router
+export default router

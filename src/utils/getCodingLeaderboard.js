@@ -1,10 +1,10 @@
-const request = require("./request")
+import request from "./request.js"
 
 /**
  * Get the coding leaderboard
  * @returns {{ name: string, value: string }[]}
  */
-module.exports = async () => {
+export default async () => {
     const { data, status } = await request("GET", "https://api.testaustime.fi/leaderboards/balls", {
         Authorization: `Bearer ${process.env.TESTAUSTIME_TOKEN}`
     })

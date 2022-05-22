@@ -1,10 +1,10 @@
-const express = require("express")
-const database = require("./database/database")
-const discord = require("./discord/discord")
-const request = require("./utils/request")
-const getQuery = require("./utils/getQuery")
-const testauskoiraDatabase = require("./testauskoira/database")
-const getCodingLeaderboard = require("./utils/getCodingLeaderboard")
+import express from "express";
+import database from "./database/database.js";
+import discord from "./discord/discord.js";
+import request from "./utils/request.js";
+import getQuery from "./utils/getQuery.js";
+import testauskoiraDatabase from "./testauskoira/database.js";
+import getCodingLeaderboard from "./utils/getCodingLeaderboard.js";
 
 const address = process.env.HTTP_URL
 const rolesWhitelistedForDataExport = ["743950610080071801"]
@@ -36,12 +36,12 @@ async function getMessagesLeaderboard() {
  */
 async function updateGuildInfoCache() {
     try {
-        const config = await database.getDataCollectionConfig(mainServer) // We'll keep this here
+        const config = await database.DataCollectionConfiguration.getDataCollectionConfig(mainServer) // We'll keep this here
         const data = await Promise.all([
-            database.getMessageCount(mainServer),
+            database.MessageCount.getMessageCount(mainServer),
             discordUtility.getMemberCount(mainServer),
             discordUtility.getOnlineCount(mainServer),
-            database.getDataCollectionConfig(mainServer),
+            database.DataCollectionConfiguration.getDataCollectionConfig(mainServer),
             discordUtility.getBoostStatus(mainServer, config?.allowed ?? []),
             getCodingLeaderboard(),
             getMessagesLeaderboard()
@@ -61,7 +61,7 @@ async function updateGuildInfoCache() {
     }
 }
 database.connection.once("open", () => {
-    discordUtility = discord.default(database)
+    discordUtility = discord.init(database)
 
     // Cache all role data on startup
     discordUtility.on("ready", async () => {
@@ -70,7 +70,7 @@ database.connection.once("open", () => {
 
         console.log("Caching role data...")
 
-        const config = await database.getDataCollectionConfig(mainServer)
+        const config = await database.DataCollectionConfiguration.getDataCollectionConfig(mainServer)
         if (!config) return console.warn("Data collection configuration for the main server does not exist. Unable to create caches.")
 
         const roles = [rolesWhitelistedForDataExport, rolesWhitelistedForConsensualDataExport].flat(1)
@@ -115,7 +115,7 @@ router.get("/memberInfo", async (req, res) => {
     } else {
         // Requires consent
         if (!rolesWhitelistedForConsensualDataExport.includes(req.query.role)) return res.json({ error: "Private role data." })
-        const config = await database.getDataCollectionConfig(mainServer)
+        const config = await database.DataCollectionConfiguration.getDataCollectionConfig(mainServer)
         if (config === null) return res.status(401).json({ error: "No private role data available." })
         role = await discordUtility.getRoleData(mainServer, req.query.role, config.allowed)
         if (role === null) return res.status(404).json({ error: "No such role or cache miss." })
@@ -157,8 +157,8 @@ router.get("/connections/authorized", async (req, res) => {
     if (connections.status !== 200) return res.status(401).send("Failed to get profile data.")
     // Got the profile data!
     const connectedAccounts = JSON.parse(connections.data).filter((account) => account.visibility === 1)
-    await database.setUserInfo(user.id, undefined, connectedAccounts)
+    await database.UserInfo.setUserInfo(user.id, undefined, connectedAccounts)
     return res.status(200).send("Success! Profile updated.")
 })
 
-module.exports = router
+export default router

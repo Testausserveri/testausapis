@@ -2,9 +2,6 @@
 import mongoose from "mongoose"
 const { connect, connection, model }= mongoose
 
-import dotenv from "dotenv"
-dotenv.config()
-
 import SchemaDataCollectionConfiguration from "./schemas/dataCollectionConfiguration.js"
 import SchemaMessageCount from "./schemas/messageCount.js"
 import SchemaProjects from "./schemas/projects.js"

@@ -4,7 +4,7 @@
  * @param {string} url The URL string
  * @returns {string}
  */
-module.exports = function getQuery(key, url) {
+export default function getQuery(key, url) {
     try {
         // eslint-disable-next-line no-param-reassign
         if (url.startsWith("/")) url = `http://local${url}`

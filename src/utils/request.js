@@ -34,10 +34,11 @@ class RequestError extends Error {
     }
 }
 
+
 // Protocol libraries
 const protocols = {
-    http: require("http"),
-    https: require("https")
+    http: await import("http"),
+    https: await import("https")
 }
 
 /**
@@ -49,7 +50,7 @@ const protocols = {
  * @param {requestOptions} options Special request options
  * @returns {Promise<requestResponse>}
  */
-module.exports = (
+export default (
     method, url, headers, body, options
 ) => new Promise((resolve, reject) => {
     // Parse the URL

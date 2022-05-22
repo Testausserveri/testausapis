@@ -1,9 +1,11 @@
-const {
-    Intents, Client, MessageActionRow, MessageButton
-} = require("discord.js")
-const { EventEmitter } = require("events")
-const { inspect } = require("util")
-const request = require("../utils/request")
+/**
+ * This file needs some serious refactoring 😵‍💫
+ */
+
+import { Intents, Client, MessageActionRow, MessageButton } from "discord.js";
+import { EventEmitter } from "events";
+import { inspect } from "util";
+import request from "../utils/request.js";
 
 const address = process.env.DEBUGGING ? "http://localhost:8080" : "https://api.testausserveri.fi"
 const discordConnectionsURL = `${address}/v1/discord/connections/authorize`
@@ -14,7 +16,7 @@ intents.add(
 )
 const client = new Client({ intents })
 
-const slashCommands = require("./slashCommands")
+import slashCommands from "./slashCommands.js";
 
 const roleCache = {}
 
@@ -37,6 +39,7 @@ async function updateDiscordApplicationsCache() {
                         .flat(2).filter((val, index, ar) => ar.map((name) => name.toLowerCase()).indexOf(val.toLowerCase()) === index)
                 }
             ]))
+        
         if (JSON.stringify(discordDetectable) !== JSON.stringify(data)) {
             discordDetectable = data
             console.log("Discord application cache updated.")
@@ -118,7 +121,7 @@ class DiscordUtility extends EventEmitter {
         if (fetchOnlyThese) roleMembersToProcess = roleMembersToProcess.filter((member) => fetchOnlyThese.includes(member.id))
         for await (const member of roleMembersToProcess) await member[1].user.fetch() // Fetch all members
         const extraMemberData = {}
-        for await (const member of roleMembersToProcess) extraMemberData[member[0]] = (await this.database.getUserInfo(member[0]))
+        for await (const member of roleMembersToProcess) extraMemberData[member[0]] = (await this.database.UserInfo.getUserInfo(member[0]))
         return {
             name: role.name,
             id: role.id,
@@ -243,7 +246,7 @@ class DiscordUtility extends EventEmitter {
  * @param {Database} database
  * @returns {DiscordUtility}
  */
-module.exports.default = (database) => {
+const init = (database) => {
     client.on("interactionCreate", async (interaction) => {
         if (process.env.DEBUGGING) {
             interaction.deferReply = () => {} // Do nothing
@@ -263,14 +266,14 @@ module.exports.default = (database) => {
                     // Handle analytics commands
                     if (["allow", "deny"].includes(interaction.options.getSubcommand())) {
                         await interaction.deferReply({ ephemeral: true })
-                        await database.updateDataCollectionPolicy(interaction.options.getSubcommand() === "allow" ? "add" : "remove", interaction.guild.id, interaction.member.id)
+                        await database.DataCollectionConfiguration.updateDataCollectionPolicy(interaction.options.getSubcommand() === "allow" ? "add" : "remove", interaction.guild.id, interaction.member.id)
                         await interaction.followUp({
                             content: `Your data collection policy was set to \`${interaction.options.getSubcommand() === "allow" ? "Allowed" : "Denied"}\``,
                             ephemeral: true
                         })
                     } else if (interaction.options.getSubcommand() === "state") {
                         await interaction.deferReply({ ephemeral: true })
-                        const state = await database.getDataCollectionConfig(interaction.guild.id)
+                        const state = await database.DataCollectionConfiguration.getDataCollectionConfig(interaction.guild.id)
                         await interaction.followUp({
                             content: `Your data collection setting is set to: \`${state.allowed.includes(interaction.user.id) ? "Allowed" : "Denied"}\``,
                             ephemeral: true
@@ -280,7 +283,7 @@ module.exports.default = (database) => {
                     // Handle profile management commands
                     if (interaction.options.getSubcommand() === "bio") {
                         await interaction.deferReply({ ephemeral: true })
-                        await database.setUserInfo(interaction.user.id, interaction.options.get("text").value, undefined)
+                        await database.UserInfo.setUserInfo(interaction.user.id, interaction.options.get("text").value, undefined)
                         await interaction.followUp({
                             content: "Profile bio set!",
                             ephemeral: true
@@ -312,7 +315,7 @@ module.exports.default = (database) => {
     })
 
     client.on("messageCreate", (message) => {
-        if (!message.author.bot) database.incrementMessageCount(message.guild.id)
+        if (!message.author.bot) database.MessageCount.incrementMessageCount(message.guild.id)
     })
 
     const utilities = new DiscordUtility(database)
@@ -324,7 +327,11 @@ module.exports.default = (database) => {
         utilities.ready = true
         console.log("Connected to Discord as", client.user.tag)
     })
-    client.login()
+    client.login(process.env.DISCORD_TOKEN)
     return utilities
 }
-module.exports.DiscordUtility = DiscordUtility
+
+export default {
+    init,
+    DiscordUtility
+}

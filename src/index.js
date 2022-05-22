@@ -1,17 +1,30 @@
-import "./console.js"
-import dotenv from "dotenv"
-dotenv.config()
-
+import "./header.js"
+import "dotenv/config"
 import express from "express"
 import Package from "../package.json"
-import apiRoute from "./api/index.js"
+import database from "./database/database.js"
 
-console.log(`Package: ${Package.name}@${Package.version}`)
-console.log(`Runtime: ${process.version}`)
-console.log(`Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`)
+import discordRoute from "./discord.js"
+import githubRoute from "./github.js"
+import miscRoute from "./misc.js"
 
-if (process.env.DEBUGGING) console.warn("DEBUGGING MODE IS ACTIVE! DISCORD INTERACTIONS WILL BE IGNORED!")
+/**
+ * Database connection
+ */
+console.log("Connecting to database...")
+await database.init()
+    .then(() => {
+        console.log("Database connected")
+    })
+    .catch((e) => {
+        console.error("Failed to connect to the database", e)
+        process.exit(1)
+    })
 
+
+/**
+ * HTTP server
+ */
 const app = express()
 
 app.use((_, res, next) => { // Allow everyone for CORS
@@ -30,13 +43,21 @@ app.get("/", (_, res) => {
     })
 })
 
-app.use("/v1", apiRoute)
+const router = express.Router()
+
+router.use("/discord", discordRoute)
+router.use("/github", githubRoute)
+router.use("/misc", miscRoute)
+
+app.use("/v1", router)
 
 app.use((_, res) => {
     if (!res.headersSent) res.status(404).json({error: "What?"})
 })
 
 const port = process.env.HTTP_PORT || 8080
+
 app.listen(port, () => {
-    console.log("Webserver listening port", port)
+    console.log(`HTTP server listening on port ${port}`)
+    console.log(`Ready!`)
 })

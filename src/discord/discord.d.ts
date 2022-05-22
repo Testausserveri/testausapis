@@ -1,6 +1,5 @@
 import { ActivityType, Snowflake, UserFlagsString } from "discord.js"
 
-
 interface Asset {
     largeImage: string,
     largeImageText: string,

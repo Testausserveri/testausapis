@@ -1,10 +1,10 @@
-const mCache = require("memory-cache")
+import mCache from "memory-cache";
 
 /**
  * In-memory cache middleware for Express
  * @param {Integer} duration Cache duration in seconds
  */
-module.exports = (duration) => (req, res, next) => {
+export default (duration) => (req, res, next) => {
     const key = `__express__${req.originalUrl}` || req.url
     const cachedBody = mCache.get(key)
     if (cachedBody) {
