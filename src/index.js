@@ -6,6 +6,7 @@ import database from "./database/database.js"
 
 import discordRoute from "./discordRoute.js"
 import githubRoute from "./githubRoute.js"
+import projectsRoute from "./projectsRoute.js"
 import miscRoute from "./miscRoute.js"
 
 /**
@@ -47,6 +48,7 @@ const router = express.Router()
 
 router.use("/discord", discordRoute)
 router.use("/github", githubRoute)
+router.use("/projects", projectsRoute)
 router.use("/", miscRoute)
 
 app.use("/v1", router)
