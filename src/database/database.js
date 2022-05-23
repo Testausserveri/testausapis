@@ -6,6 +6,7 @@ import SchemaDataCollectionConfiguration from "./schemas/dataCollectionConfigura
 import SchemaMessageCount from "./schemas/messageCount.js"
 import SchemaProjects from "./schemas/projects.js"
 import SchemaUserInfo from "./schemas/userInfo.js"
+import SchemaTag from "./schemas/tag.js"
 
 /**
  * Initialize a database connection
@@ -31,6 +32,10 @@ const models = {
     UserInfo: model(
         "UserInfo",
         SchemaUserInfo
+    ),
+    SchemaTag: model(
+        "Tag",
+        SchemaTag
     )
 }
 

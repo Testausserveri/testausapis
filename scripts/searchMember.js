@@ -1,5 +1,5 @@
 import "dotenv/config"
-import database from "../../src/database/database.js"
+import database from "../src/database/database.js"
 
 import inquirer from "inquirer";
 import inquirerPrompt from "inquirer-autocomplete-prompt";

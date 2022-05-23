@@ -1,3 +1,5 @@
+// to-do: fix file save path
+
 import https from "https"
 import fs from "fs"
 
@@ -7,7 +9,7 @@ export function cacheAvatar(id, member) {
             const url = member.displayAvatarURL()
             const filename = `${id}`
 
-            const file = fs.createWriteStream(`./avatars/${filename}`);
+            const file = fs.createWriteStream(`./media/avatars/${filename}`);
             https.get(url, function(response) {
                 response.pipe(file)
                 

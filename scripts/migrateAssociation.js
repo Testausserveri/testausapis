@@ -8,6 +8,8 @@
  * 
  * I don't know what happens if you run this script more than once
  * => Try first on a test database
+ * 
+ * to-do: save timestamp from row
  */
 
 import "dotenv/config"
