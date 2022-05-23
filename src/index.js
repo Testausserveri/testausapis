@@ -4,9 +4,9 @@ import express from "express"
 import Package from "../package.json" assert {type: "json"}
 import database from "./database/database.js"
 
-import discordRoute from "./discord.js"
-import githubRoute from "./github.js"
-import miscRoute from "./misc.js"
+import discordRoute from "./discordRoute.js"
+import githubRoute from "./githubRoute.js"
+import miscRoute from "./miscRoute.js"
 
 /**
  * Database connection
@@ -47,7 +47,7 @@ const router = express.Router()
 
 router.use("/discord", discordRoute)
 router.use("/github", githubRoute)
-router.use("/misc", miscRoute)
+router.use("/", miscRoute)
 
 app.use("/v1", router)
 

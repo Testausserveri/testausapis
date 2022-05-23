@@ -32,7 +32,7 @@ SchemaMessageCount.statics.incrementMessageCount = async function (id) {
         } else template.count = (typeof server.count === "number" ? server.count : 0) + 1
     }
     cache.messageCounts[id] = { timestamp: new Date().getTime(), count: template.count }
-    await SchemaMessageCount.findOneAndUpdate({ id }, template, { upsert: true })
+    await this.findOneAndUpdate({ id }, template, { upsert: true })
 }
 
 /**

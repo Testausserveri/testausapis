@@ -1,6 +1,6 @@
 {
   "name": "testausapis",
-  "version": "1.5.3",
+  "version": "1.6.0",
   "description": "",
   "main": "src/index.js",
   "type": "module",
@@ -26,9 +26,12 @@
     "mongoose": "^6.0.15"
   },
   "devDependencies": {
+    "csv-parser": "^3.0.0",
     "eslint": "^8.5.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.25.3",
-    "eslint-plugin-prettier": "^4.0.0"
+    "eslint-plugin-prettier": "^4.0.0",
+    "inquirer": "^8.2.4",
+    "inquirer-autocomplete-prompt": "^2.0.0"
   }
 }
