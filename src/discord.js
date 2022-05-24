@@ -1,10 +1,10 @@
-import express from "express";
-import database from "./database/database.js";
-import discord from "./discord/discord.js";
-import request from "./utils/request.js";
-import getQuery from "./utils/getQuery.js";
-import testauskoiraDatabase from "./testauskoira/database.js";
-import getCodingLeaderboard from "./utils/getCodingLeaderboard.js";
+import { Router } from "express"
+import database from "./database/database"
+import discord from "./discord/discord"
+import request from "./utils/request"
+import getQuery from "./utils/getQuery"
+import testauskoiraDatabase from "./testauskoira/database"
+import getCodingLeaderboard from "./utils/getCodingLeaderboard"
 
 const address = process.env.HTTP_URL
 const rolesWhitelistedForDataExport = ["743950610080071801"]
@@ -12,7 +12,8 @@ const rolesWhitelistedForConsensualDataExport = ["839072621060423771", "75532789
 const discordCallback = `${address}/v1/discord/connections/authorized`
 const mainServer = "697710787636101202"
 
-const router = express.Router()
+// eslint-disable-next-line new-cap
+const router = Router()
 testauskoiraDatabase.connect()
 
 let discordUtility // The Discord utility class
@@ -64,6 +65,7 @@ database.connection.once("open", () => {
     discordUtility = discord.init(database)
 
     // Cache all role data on startup
+    // eslint-disable-next-line consistent-return
     discordUtility.on("ready", async () => {
         setInterval(updateGuildInfoCache, liveCacheTTL)
         updateGuildInfoCache()

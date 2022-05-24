@@ -1,18 +1,18 @@
-import "./header.js"
+import "./header"
 import "dotenv/config"
 import express from "express"
-import Package from "../package.json" assert {type: "json"}
-import database from "./database/database.js"
+import Package from "../package.json" // assert {type: "json"}
+import database from "./database/database"
 
-import discordRoute from "./discord.js"
-import githubRoute from "./github.js"
-import miscRoute from "./misc.js"
+import discordRoute from "./discord"
+import githubRoute from "./github"
+import miscRoute from "./misc"
 
 /**
  * Database connection
  */
 console.log("Connecting to database...")
-await database.init()
+database.init()
     .then(() => {
         console.log("Database connected")
     })
@@ -20,7 +20,6 @@ await database.init()
         console.error("Failed to connect to the database", e)
         process.exit(1)
     })
-
 
 /**
  * HTTP server
@@ -43,6 +42,7 @@ app.get("/", (_, res) => {
     })
 })
 
+// eslint-disable-next-line new-cap
 const router = express.Router()
 
 router.use("/discord", discordRoute)
@@ -52,12 +52,11 @@ router.use("/misc", miscRoute)
 app.use("/v1", router)
 
 app.use((_, res) => {
-    if (!res.headersSent) res.status(404).json({error: "What?"})
+    if (!res.headersSent) res.status(404).json({ error: "What?" })
 })
 
 const port = process.env.HTTP_PORT || 8080
 
 app.listen(port, () => {
     console.log(`HTTP server listening on port ${port}`)
-    console.log(`Ready!`)
 })

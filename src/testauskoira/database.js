@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 /* eslint-disable import/extensions */
-import mariadb from "mariadb";
+import mariadb from "mariadb"
 
 let connection
 

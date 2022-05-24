@@ -1,15 +1,13 @@
 /* eslint-disable function-paren-newline */
-import mongoose from "mongoose"
-const { connect, connection, model }= mongoose
-
-import SchemaDataCollectionConfiguration from "./schemas/dataCollectionConfiguration.js"
-import SchemaMessageCount from "./schemas/messageCount.js"
-import SchemaProjects from "./schemas/projects.js"
-import SchemaUserInfo from "./schemas/userInfo.js"
+import { connect, connection, model } from "mongoose"
+import SchemaDataCollectionConfiguration from "./schemas/dataCollectionConfiguration"
+import SchemaMessageCount from "./schemas/messageCount"
+import SchemaProjects from "./schemas/projects"
+import SchemaUserInfo from "./schemas/userInfo"
 
 /**
  * Initialize a database connection
- * @returns {mongoose.Connection}
+ * @returns {import("mongoose").Connection}
  */
 async function init() {
     return connect(process.env.TEST_CLUSTER ?? `mongodb://${process.env.MONGODB_HOST || "testausapis_mongo"}:27017/main`)

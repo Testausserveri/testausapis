@@ -1,11 +1,12 @@
-import express from "express"
-import request from "./utils/request.js"
-import getQuery from "./utils/getQuery.js"
+import { Router } from "express"
+import request from "./utils/request"
+import getQuery from "./utils/getQuery"
 
 const address = process.env.HTTP_URL
 const githubCallback = `${address}/v1/github/authorized`
 
-const router = express.Router()
+// eslint-disable-next-line new-cap
+const router = Router()
 
 router.get("/authorize", (req, res) => {
     res.redirect(`https://github.com/login/oauth/authorize?client_id=${process.env.GH_CLIENT_ID}&redirect_uri=${githubCallback}&scope=write:org`)

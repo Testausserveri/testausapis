@@ -1,9 +1,9 @@
-import express from "express"
+import { Router } from "express"
+import request from "./utils/request"
+import cache from "./utils/cache"
 
-import request from "./utils/request.js"
-import cache from "./utils/cache.js"
-
-const router = express.Router()
+// eslint-disable-next-line new-cap
+const router = Router()
 
 router.get("/codingLeaderboard", cache(7), async (req, res) => {
     const { data } = await request("GET", "https://api.testaustime.fi/leaderboards/balls", {

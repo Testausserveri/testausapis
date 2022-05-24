@@ -1,6 +1,4 @@
-/* eslint-disable func-names */
-import mongoose from "mongoose"
-const { Schema } = mongoose
+import { Schema } from "mongoose"
 
 const SchemaUserInfo = new Schema({
     id: String,

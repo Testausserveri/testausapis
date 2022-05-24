@@ -1,4 +1,4 @@
-import request from "./request.js"
+import request from "./request"
 
 /**
  * Get the coding leaderboard

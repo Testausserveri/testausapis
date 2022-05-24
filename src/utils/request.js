@@ -34,11 +34,13 @@ class RequestError extends Error {
     }
 }
 
-
 // Protocol libraries
+// eslint-disable-next-line import/first
+import http from "http"
+// eslint-disable-next-line import/first, import/newline-after-import
+import https from "https"
 const protocols = {
-    http: await import("http"),
-    https: await import("https")
+    http, https
 }
 
 /**
