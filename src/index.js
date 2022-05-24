@@ -1,7 +1,7 @@
 import "./header.js"
 import "dotenv/config"
 import express from "express"
-import Package from "../package.json" assert {type: "json"}
+import Package from "../package.json" assert { type: "json" }
 import database from "./database/database.js"
 
 import discordRoute from "./routes/discord.js"

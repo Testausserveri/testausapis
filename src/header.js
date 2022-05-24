@@ -1,5 +1,5 @@
 import "./console.js"
-import Package from "../package.json" assert {type: "json"}
+import Package from "../package.json" assert { type: "json" }
 
 console.log(`Package: ${Package.name}@${Package.version}`)
 console.log(`Runtime: ${process.version}`)
