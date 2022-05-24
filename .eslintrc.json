@@ -31,6 +31,7 @@
         "no-restricted-syntax": ["error", "LabeledStatement", "WithStatement"],
         "class-methods-use-this": "off",
         "consistent-return": "warn",
-        "func-names": ["error", "never"]
+        "func-names": ["error", "never"],
+        "import/extensions": ["error", "ignorePackages", { "js": "always", "json": "always" }]
     }
 }

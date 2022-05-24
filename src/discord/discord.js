@@ -6,8 +6,8 @@ import {
     Intents, Client, MessageActionRow, MessageButton
 } from "discord.js"
 import { inspect } from "util"
-import request from "../utils/request"
-import DiscordUtility from "./util"
+import request from "../utils/request.js"
+import DiscordUtility from "./util.js"
 
 // Constants
 const address = process.env.DEBUGGING ? "http://localhost:8080" : "https://api.testausserveri.fi"

@@ -1,4 +1,4 @@
-import "./console"
+import "./console.js"
 import Package from "../package.json" // assert {type: "json"}
 
 console.log(`Package: ${Package.name}@${Package.version}`)

@@ -1,12 +1,12 @@
-import "./header"
+import "./header.js"
 import "dotenv/config"
 import express from "express"
 import Package from "../package.json" // assert {type: "json"}
-import database from "./database/database"
+import database from "./database/database.js"
 
-import discordRoute from "./discord"
-import githubRoute from "./github"
-import miscRoute from "./misc"
+import discordRoute from "./routes/discord.js"
+import githubRoute from "./routes/github.js"
+import miscRoute from "./routes/misc.js"
 
 /**
  * Database connection
