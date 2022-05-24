@@ -1,4 +1,6 @@
-import { Schema } from "mongoose"
+import mongoose from "mongoose"
+
+const { Schema } = mongoose
 
 const SchemaUserInfo = new Schema({
     id: String,

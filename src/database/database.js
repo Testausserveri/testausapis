@@ -1,9 +1,11 @@
 /* eslint-disable function-paren-newline */
-import { connect, connection, model } from "mongoose"
+import mongoose from "mongoose"
 import SchemaDataCollectionConfiguration from "./schemas/dataCollectionConfiguration.js"
 import SchemaMessageCount from "./schemas/messageCount.js"
 import SchemaProjects from "./schemas/projects.js"
 import SchemaUserInfo from "./schemas/userInfo.js"
+
+const { connect, connection, model } = mongoose
 
 /**
  * Initialize a database connection
