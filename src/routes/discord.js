@@ -61,8 +61,8 @@ async function updateGuildInfoCache() {
         console.error("Failed to update guildInfo cache.", e)
     }
 }
-database.connection.once("open", () => {
-    discordUtility = discord.init(database)
+database.connection.once("open", async () => {
+    discordUtility = await discord.init(database)
 
     // Cache all role data on startup
     // eslint-disable-next-line consistent-return
