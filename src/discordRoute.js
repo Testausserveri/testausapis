@@ -1,10 +1,10 @@
 import { Router } from "express"
-import database from "../database/database.js"
-import discord from "../discord/discord.js"
-import request from "../utils/request.js"
-import getQuery from "../utils/getQuery.js"
-import testauskoiraDatabase from "../testauskoira/database.js"
-import getCodingLeaderboard from "../utils/getCodingLeaderboard.js"
+import database from "./database/database.js"
+import discord from "./discord/discord.js"
+import request from "./utils/request.js"
+import getQuery from "./utils/getQuery.js"
+import testauskoiraDatabase from "./testauskoira/database.js"
+import getCodingLeaderboard from "./utils/getCodingLeaderboard.js"
 
 const address = process.env.HTTP_URL
 const rolesWhitelistedForDataExport = ["743950610080071801"]

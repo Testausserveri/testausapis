@@ -4,6 +4,7 @@ import SchemaDataCollectionConfiguration from "./schemas/dataCollectionConfigura
 import SchemaMessageCount from "./schemas/messageCount.js"
 import SchemaProjects from "./schemas/projects.js"
 import SchemaUserInfo from "./schemas/userInfo.js"
+import SchemaTag from "./schemas/tag.js"
 
 const { connect, connection, model } = mongoose
 
@@ -31,6 +32,10 @@ const models = {
     UserInfo: model(
         "UserInfo",
         SchemaUserInfo
+    ),
+    SchemaTag: model(
+        "Tag",
+        SchemaTag
     )
 }
 
