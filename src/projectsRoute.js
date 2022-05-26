@@ -8,16 +8,18 @@ const router = express.Router()
 router.get("/", async (req, res) => {
     const results = await database.Projects
         .find()
-        .populate("members", "nickname username")
+        .populate("members", "nickname username associationMembership.firstName associationMembership.lastName")
         .populate("tags", "name")
-
+    
     // Rearrange data to make it the most effective for a HTTP response
     const data = results.map(result => ({
         _id: result._id,
         description: result.description.short,
-        members: result.members.map(({_id, nickname, username}) => ({
+        members: result.members.map(({_id, associationMembership, nickname, username}) => ({
             _id,
-            name: nickname || username
+            name: associationMembership ? 
+                `${associationMembership.firstName} ${associationMembership.lastName[0]}.` 
+                : (nickname || username)
         })),
         tags: result.tags.map(tag => tag.name),
         media: (() => {
