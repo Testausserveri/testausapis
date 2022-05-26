@@ -1,4 +1,4 @@
-import mCache from "memory-cache";
+import mCache from "memory-cache"
 
 /**
  * In-memory cache middleware for Express
