@@ -4,3 +4,5 @@ old_src
 data
 avatars
 assoc.csv
+media
+.DS_Store

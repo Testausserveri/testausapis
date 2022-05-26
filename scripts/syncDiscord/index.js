@@ -2,7 +2,9 @@
  * Synchronize Discord users to our database
  */
 
-import "dotenv/config"
+import path from "path"
+import dotenv from "dotenv"
+dotenv.config({path: path.join(path.resolve(), "../../.env")})
 
 import { Client, Intents } from "discord.js";
 import database from "../../src/database/database.js"
@@ -42,11 +44,22 @@ client.on("ready", async () => {
     .map(([userid, member]) => member)
   //  .splice(0,2)
 
+  let progress = 0
+  let progressReportTimeout = 0
+  function incrementProgress() {
+    progress++
+    if (progressReportTimeout) clearTimeout(progressReportTimeout)
+    progressReportTimeout = setTimeout(() => {
+      console.log(`Progress ${progress} / ${members.length}`)
+    }, 200)
+  }
+
   const promises = []
 
   for (const member of members) {
     promises.push(upsertDatabase(member)
       .then(user => cacheAvatar(user._id.toString(), member))
+      .then(() => incrementProgress())
       .catch(e => {
           console.error(`\x1b[41m${member.user.username} failed\x1b[0m`, e)
       }))
