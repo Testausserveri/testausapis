@@ -4,7 +4,12 @@
 
 import path from "path"
 import dotenv from "dotenv"
-dotenv.config({path: path.join(path.resolve(), "../../.env")})
+import process from "process"
+import { fileURLToPath } from 'url'
+
+const currentPath = path.dirname(fileURLToPath(import.meta.url))
+
+dotenv.config({path: path.join(currentPath, "../../.env")})
 
 import { Client, Intents } from "discord.js";
 import database from "../../src/database/database.js"

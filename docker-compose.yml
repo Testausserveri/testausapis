@@ -15,6 +15,8 @@ services:
             - "8140:8080"
         links:
             - testausapis_mongo
+        volumes:
+            - ./media:/usr/src/app/media
     testausapis_mongo:
         container_name: testausapis_mongo
         restart: unless-stopped

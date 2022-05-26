@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 #
 # Discord.sh - Discord on command-line
 # by ChaoticWeg and fieu
@@ -30,7 +30,7 @@ curl_ok=$?
 get_ts() { date -u -Iseconds; };
 
 thisdir="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
-webhook_file="${thisdir}/.webhook"
+webhook_file="${thisdir}/.webhook" 
 
 help_text="Usage: discord.sh --webhook-url=<url> [OPTIONS]
 

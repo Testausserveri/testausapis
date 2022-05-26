@@ -1,0 +1,8 @@
+node_modules/
+.env
+old_src
+data
+avatars
+assoc.csv
+media
+.DS_Store
