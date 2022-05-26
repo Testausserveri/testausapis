@@ -1,6 +1,6 @@
 import { Router } from "express"
-import request from "../utils/request.js"
-import getQuery from "../utils/getQuery.js"
+import request from "./utils/request.js"
+import getQuery from "./utils/getQuery.js"
 
 const address = process.env.HTTP_URL
 const githubCallback = `${address}/v1/github/authorized`

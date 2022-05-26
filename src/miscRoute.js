@@ -1,6 +1,6 @@
 import { Router } from "express"
-import request from "../utils/request.js"
-import cache from "../utils/cache.js"
+import request from "./utils/request.js"
+import cache from "./utils/cache.js"
 
 // eslint-disable-next-line new-cap
 const router = Router()
