@@ -10,21 +10,23 @@ router.get("/", async (req, res) => {
         .find()
         .populate("members", "nickname username associationMembership.firstName associationMembership.lastName")
         .populate("tags", "name")
-    
+
     // Rearrange data to make it the most effective for a HTTP response
-    const data = results.map(result => ({
+    const data = results.map((result) => ({
         _id: result._id,
         description: result.description.short,
-        members: result.members.map(({_id, associationMembership, nickname, username}) => ({
+        members: result.members.map(({
+            _id, associationMembership, nickname, username
+        }) => ({
             _id,
-            name: associationMembership ? 
-                `${associationMembership.firstName} ${associationMembership.lastName[0]}.` 
-                : (nickname || username)
+            name: associationMembership?.lastName ?
+                `${associationMembership.firstName} ${associationMembership.lastName[0]}.` :
+                (nickname || username)
         })),
-        tags: result.tags.map(tag => tag.name),
+        tags: result.tags.map((tag) => tag.name),
         media: (() => {
-            const {type, filename} = result.media.find(item => item.cover)
-            return {type, filename}
+            const { type, filename } = result.media.find((item) => item.cover)
+            return { type, filename }
         })(),
         name: result.name,
         slug: result.slug
