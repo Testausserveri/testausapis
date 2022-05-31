@@ -4,10 +4,10 @@ import express from "express"
 import Package from "../package.json" assert { type: "json" }
 import database from "./database/database.js"
 
-import discordRoute from "./discordRoute.js"
-import githubRoute from "./githubRoute.js"
-import projectsRoute from "./projectsRoute.js"
-import miscRoute from "./miscRoute.js"
+import discordRoute from "./routes/discord.js"
+import githubRoute from "./routes/github.js"
+import projectsRoute from "./routes/projects.js"
+import miscRoute from "./routes/misc.js"
 
 /**
  * Database connection

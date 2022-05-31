@@ -1,7 +1,7 @@
 // to-do: implement cache
 
 import express from "express"
-import database from "./database/database.js"
+import database from "../database/database.js"
 
 const router = express.Router()
 

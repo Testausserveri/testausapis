@@ -13,7 +13,7 @@ const { connect, connection, model } = mongoose
  * @returns {import("mongoose").Connection}
  */
 async function init() {
-    return connect(process.env.TEST_CLUSTER ?? `mongodb://${process.env.MONGODB_HOST || "testausapis_mongo"}:27017/main`)
+    return connect(process.env.TEST_CLUSTER ?? `mongodb://${process.env.MONGODB_HOST || "testausapis_mongo"}:27018/main`)
 }
 
 const models = {
