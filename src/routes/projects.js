@@ -35,4 +35,32 @@ router.get("/", async (req, res) => {
     res.json(data)
 })
 
+router.get("/:slug", async (req, res) => {
+    const { slug } = req.params
+    const result = await database.Projects
+        .findOne({ slug }, "-_id -links._id -media._id")
+        .populate("members", "nickname username associationMembership.firstName associationMembership.lastName")
+        .populate("tags", "name")
+
+    const data = {
+        _id: result._id,
+        description: result.description,
+        members: result.members.map(({
+            _id, associationMembership, nickname, username
+        }) => ({
+            _id,
+            name: associationMembership?.lastName ?
+                `${associationMembership.firstName} ${associationMembership.lastName[0]}.` :
+                (nickname || username)
+        })),
+        tags: result.tags.map((tag) => tag.name),
+        media: result.media,
+        links: result.links,
+        name: result.name,
+        slug: result.slug
+    }
+
+    res.json(data)
+})
+
 export default router

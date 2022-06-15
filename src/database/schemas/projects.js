@@ -14,8 +14,8 @@ const SchemaProjects = new Schema({
         {
             type: {
                 type: String,
-                enum : ['IMAGE', 'YOUTUBE'],
-                default: 'IMAGE'
+                enum: ["IMAGE", "YOUTUBE"],
+                default: "IMAGE"
             },
             filename: String,
             externalUrl: String,
@@ -26,8 +26,9 @@ const SchemaProjects = new Schema({
         {
             type: {
                 type: String,
-                enum : ['GITHUB', 'HOMEPAGE', 'LINK'],
-                default: 'GITHUB'
+                name: String,
+                enum: ["GITHUB", "HOMEPAGE", "LINK"],
+                default: "GITHUB"
             },
             url: String
         }
