@@ -14,9 +14,12 @@ async function getContributors(urls) {
             avatar: item.avatar_url
         }))
 
-        contributors.push(...items)
+        for (const item of items) {
+            // add & skip duplicates
+            if (!contributors.find((contributor) => contributor.id === item.id)) contributors.push(item)
+        }
     }
-
+    console.log(contributors)
     return contributors
 }
 
