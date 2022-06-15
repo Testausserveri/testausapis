@@ -19,7 +19,6 @@ async function getContributors(urls) {
             if (!contributors.find((contributor) => contributor.id === item.id)) contributors.push(item)
         }
     }
-    console.log(contributors)
     return contributors
 }
 
