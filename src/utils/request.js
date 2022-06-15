@@ -64,6 +64,10 @@ export default (
         return
     }
 
+    // Add user agent
+    // eslint-disable-next-line no-param-reassign
+    headers = { ...headers, "User-Agent": "testausserveri/testausapis" }
+
     // Get the correct protocol library
     const library = protocols[urlInstance.protocol.toLowerCase().replace(":", "")]
     if (library === undefined) {

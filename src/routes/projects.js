@@ -2,6 +2,7 @@
 
 import express from "express"
 import database from "../database/database.js"
+import github from "../utils/github.js"
 
 const router = express.Router()
 
@@ -42,6 +43,7 @@ router.get("/:slug", async (req, res) => {
         .populate("members", "nickname username associationMembership.firstName associationMembership.lastName")
         .populate("tags", "name")
 
+    const githubLink = result.links.filter((item) => item.type === "github").map((item) => item.url)
     const data = {
         _id: result._id,
         description: result.description,
@@ -57,7 +59,10 @@ router.get("/:slug", async (req, res) => {
         media: result.media,
         links: result.links,
         name: result.name,
-        slug: result.slug
+        slug: result.slug,
+        ...(githubLink ? {
+            contributors: await github.getContributors(githubLink)
+        } : null)
     }
 
     res.json(data)
