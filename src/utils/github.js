@@ -9,6 +9,7 @@ async function getReadmes(repositories) {
 
     for (const repository of repositories) {
         const readmeURL = `https://raw.githubusercontent.com/${repository.full_name}/${repository.default_branch}/README.md`
+        // eslint-disable-next-line no-await-in-loop
         const { data } = await request("GET", readmeURL)
 
         all[repository.full_name.toLowerCase()] = data
@@ -23,7 +24,9 @@ async function getRepositories(urls) {
     for (const url of urls) {
         const target = getTarget(url)
         // eslint-disable-next-line no-await-in-loop
-        const { data } = await request("GET", `https://api.github.com/repos/${target}`)
+        const { data } = await request("GET", `https://api.github.com/repos/${target}`, {
+            Authorization: `token ${process.env.GH_PAT}`
+        })
 
         all.push(JSON.parse(data))
     }
@@ -37,8 +40,9 @@ async function getContributors(urls) {
     for (const url of urls) {
         const target = getTarget(url)
         // eslint-disable-next-line no-await-in-loop
-        const { data } = await request("GET", `https://api.github.com/repos/${target}/contributors`)
-
+        const { data } = await request("GET", `https://api.github.com/repos/${target}/contributors`, {
+            Authorization: `token ${process.env.GH_PAT}`
+        })
         const items = JSON.parse(data).map((item) => ({
             id: item.id,
             name: item.login,
