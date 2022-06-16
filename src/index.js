@@ -27,6 +27,8 @@ database.init()
  */
 const app = express()
 
+app.set("json spaces", 2)
+
 app.use((_, res, next) => { // Allow everyone for CORS
     res.setHeader("Access-Control-Allow-Origin", "*")
     next()

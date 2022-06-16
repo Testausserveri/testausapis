@@ -43,7 +43,20 @@ router.get("/:slug", async (req, res) => {
         .populate("members", "nickname username associationMembership.firstName associationMembership.lastName")
         .populate("tags", "name")
 
-    const githubLink = result.links.filter((item) => item.type === "github").map((item) => item.url)
+    const githubLinks = result.links.filter((item) => item.type === "github").map((item) => item.url)
+    let githubData = {}
+
+    if (githubLinks.length > 0) {
+        const contributors = await github.getContributors(githubLinks)
+        const repositories = await github.getRepositories(githubLinks)
+        const readmes = await github.getReadmes(repositories)
+
+        githubData = {
+            contributors,
+            readmes
+        }
+    }
+
     const data = {
         _id: result._id,
         description: result.description,
@@ -60,9 +73,7 @@ router.get("/:slug", async (req, res) => {
         links: result.links,
         name: result.name,
         slug: result.slug,
-        ...(githubLink ? {
-            contributors: await github.getContributors(githubLink)
-        } : null)
+        ...(githubLinks.length > 0 ? githubData : null)
     }
 
     res.json(data)
