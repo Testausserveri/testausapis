@@ -60,6 +60,8 @@ router.get("/:slug", async (req, res) => {
         .populate("members", "nickname username associationMembership.firstName associationMembership.lastName")
         .populate("tags", "name")
 
+    if (!result) return res.status(404).json({ status: "not found" })
+
     const githubLinks = result.links.filter((item) => item.type === "github").map((item) => item.url)
     let githubData = {}
 
