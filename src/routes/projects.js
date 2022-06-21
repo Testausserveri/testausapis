@@ -7,10 +7,18 @@ import github from "../utils/github.js"
 const router = express.Router()
 
 router.get("/", async (req, res) => {
-    const results = await database.Projects
-        .find()
+    let task = database.Projects.find()
         .populate("members", "nickname username associationMembership.firstName associationMembership.lastName")
         .populate("tags", "name")
+
+    // Technically, S and P in "Suggested Projects" stand for:
+    // S - Summanmutikka = Random
+    // P - Projects
+    if (req.query.suggested) task = task.skip(Math.random() * database.Projects.estimatedDocumentCount()).limit(3)
+
+    const results = await task
+
+    if (req.query.suggested) results.sort(() => 0.5 - Math.random())
 
     // Rearrange data to make it the most effective for a HTTP response
     const data = results.map((result) => ({
