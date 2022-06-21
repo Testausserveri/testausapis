@@ -7,9 +7,12 @@ import github from "../utils/github.js"
 const router = express.Router()
 
 router.get("/", async (req, res) => {
-    let task = database.Projects.find()
-        .populate("members", "nickname username associationMembership.firstName associationMembership.lastName")
-        .populate("tags", "name")
+    let task = database.Projects.find({}, req.query.slugs ? "slug" : null)
+
+    if (!req.query.slugs) {
+        task = task.populate("members", "nickname username associationMembership.firstName associationMembership.lastName")
+            .populate("tags", "name")
+    }
 
     // Technically, S and P in "Suggested Projects" stand for:
     // S - Summanmutikka = Random
@@ -20,26 +23,32 @@ router.get("/", async (req, res) => {
 
     if (req.query.suggested) results.sort(() => 0.5 - Math.random())
 
-    // Rearrange data to make it the most effective for a HTTP response
-    const data = results.map((result) => ({
-        _id: result._id,
-        description: result.description.short,
-        members: result.members.map(({
-            _id, associationMembership, nickname, username
-        }) => ({
-            _id,
-            name: associationMembership?.lastName ?
-                `${associationMembership.firstName} ${associationMembership.lastName[0]}.` :
-                (nickname || username)
-        })),
-        tags: result.tags.map((tag) => tag.name),
-        media: (() => {
-            const { type, filename } = result.media.find((item) => item.cover)
-            return { type, filename }
-        })(),
-        name: result.name,
-        slug: result.slug
-    }))
+    let data
+
+    if (req.query.slugs) {
+        data = results.map((result) => result.slug)
+    } else {
+        // Rearrange data to make it the most effective for a HTTP response
+        data = results.map((result) => ({
+            _id: result._id,
+            description: result.description.short,
+            members: result.members.map(({
+                _id, associationMembership, nickname, username
+            }) => ({
+                _id,
+                name: associationMembership?.lastName ?
+                    `${associationMembership.firstName} ${associationMembership.lastName[0]}.` :
+                    (nickname || username)
+            })),
+            tags: result.tags.map((tag) => tag.name),
+            media: (() => {
+                const { type, filename } = result.media.find((item) => item.cover)
+                return { type, filename }
+            })(),
+            name: result.name,
+            slug: result.slug
+        }))
+    }
 
     res.json(data)
 })
