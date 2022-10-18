@@ -42,6 +42,7 @@ router.get("/", async (req, res) => {
             })),
             tags: result.tags.map((tag) => tag.name),
             media: (() => {
+                if (result.media.length == 0) return {}
                 const { type, filename } = result.media.find((item) => item.cover)
                 return { type, filename }
             })(),
