@@ -7,7 +7,7 @@ import github from "../utils/github.js"
 const router = express.Router()
 
 router.get("/", async (req, res) => {
-    let task = database.Projects.find({}, req.query.slugs ? "slug" : null)
+    let task = database.Projects.find({publishState: "PUBLISHED"}, req.query.slugs ? "slug" : null)
 
     if (!req.query.slugs) {
         task = task.populate("members", "nickname username associationMembership.firstName associationMembership.lastName")
