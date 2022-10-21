@@ -5,6 +5,11 @@ const { Schema } = mongoose
 const SchemaProjects = new Schema({
     name: String,
     slug: String,
+    publishState: {
+        type: String,
+        enum: ["DRAFT", "PUBLISHED"],
+        default: "DRAFT"
+    },
     members: [{ type: Schema.Types.ObjectId, ref: "UserInfo" }],
     description: {
         short: String
