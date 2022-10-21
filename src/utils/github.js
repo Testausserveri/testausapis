@@ -5,17 +5,22 @@ function getTarget(url) {
 }
 
 async function getReadmes(repositories) {
-    const all = {}
+    try {
+        const all = {}
 
-    for (const repository of repositories) {
-        const readmeURL = `https://raw.githubusercontent.com/${repository.full_name}/${repository.default_branch}/README.md`
-        // eslint-disable-next-line no-await-in-loop
-        const { data } = await request("GET", readmeURL)
+        for (const repository of repositories) {
+            const readmeURL = `https://raw.githubusercontent.com/${repository.full_name}/${repository.default_branch}/README.md`
+            // eslint-disable-next-line no-await-in-loop
+            const { data } = await request("GET", readmeURL)
 
-        all[repository.full_name.toLowerCase()] = data
+            all[repository.full_name.toLowerCase()] = data
+        }
+
+        return all
+    } catch (e) {
+        console.error(`Couldn't load READMEs for ${repositories.map((rep) => rep.full_name).join()}, because ${e.message}`)
+        return {}
     }
-
-    return all
 }
 
 async function getRepositories(urls) {
@@ -35,26 +40,31 @@ async function getRepositories(urls) {
 }
 
 async function getContributors(urls) {
-    const contributors = []
+    try {
+        const contributors = []
 
-    for (const url of urls) {
-        const target = getTarget(url)
-        // eslint-disable-next-line no-await-in-loop
-        const { data } = await request("GET", `https://api.github.com/repos/${target}/contributors`, {
-            Authorization: `token ${process.env.GH_PAT}`
-        })
-        const items = JSON.parse(data).map((item) => ({
-            id: item.id,
-            name: item.login,
-            avatar: item.avatar_url
-        }))
+        for (const url of urls) {
+            const target = getTarget(url)
+            // eslint-disable-next-line no-await-in-loop
+            const { data } = await request("GET", `https://api.github.com/repos/${target}/contributors`, {
+                Authorization: `token ${process.env.GH_PAT}`
+            })
+            const items = JSON.parse(data).map((item) => ({
+                id: item.id,
+                name: item.login,
+                avatar: item.avatar_url
+            }))
 
-        for (const item of items) {
-            // add & skip duplicates
-            if (!contributors.find((contributor) => contributor.id === item.id)) contributors.push(item)
+            for (const item of items) {
+                // add & skip duplicates
+                if (!contributors.find((contributor) => contributor.id === item.id)) contributors.push(item)
+            }
         }
+        return contributors
+    } catch (e) {
+        console.error(`Couldn't load contributors for ${urls.join()}, because ${e.message}`)
+        return []
     }
-    return contributors
 }
 
 const github = {
