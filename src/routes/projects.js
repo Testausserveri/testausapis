@@ -7,7 +7,7 @@ import github from "../utils/github.js"
 const router = express.Router()
 
 router.get("/", async (req, res) => {
-    let task = database.Projects.find({publishState: "PUBLISHED"}, req.query.slugs ? "slug" : null)
+    let task = database.Projects.find({ publishState: "PUBLISHED" }, req.query.slugs ? "slug" : null)
 
     if (!req.query.slugs) {
         task = task.populate("members", "nickname username associationMembership.firstName associationMembership.lastName")
@@ -64,7 +64,10 @@ router.get("/:slug", async (req, res) => {
     if (!result) return res.status(404).json({ status: "not found" })
 
     const githubLinks = result.links.filter((item) => item.type === "github").map((item) => item.url)
-    let githubData = {}
+    let githubData = {
+        contributors: [],
+        readmes: {}
+    }
 
     if (githubLinks.length > 0) {
         const contributors = await github.getContributors(githubLinks)
@@ -93,7 +96,7 @@ router.get("/:slug", async (req, res) => {
         links: result.links,
         name: result.name,
         slug: result.slug,
-        ...(githubLinks.length > 0 ? githubData : null)
+        ...githubData
     }
 
     res.json(data)
