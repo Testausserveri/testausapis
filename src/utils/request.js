@@ -15,7 +15,7 @@
  * @typedef {object} requestResponse
  * @property {string} status HTTP response status code
  * @property {Object} headers HTTP response headers
- * @property {string|Buffer} body HTTP response body
+ * @property {string|Buffer} data HTTP response body
  */
 
 // Custom errors
