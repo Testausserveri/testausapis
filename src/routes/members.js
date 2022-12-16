@@ -69,7 +69,7 @@ router.post("/login", json(), async (req, res) => {
         res.setHeader("Set-Cookie", `code=${code}`)
         res.setHeader("Content-Type", "text/html")
         res.setHeader("Location", "/v1/members/")
-        return res.status(200).send(`
+        return res.status(307).send(`
             <header>
                 <title>Redirecting...</title>
             </header>
