@@ -83,19 +83,22 @@ SchemaUserInfo.statics.autoComplete = async function (search) {
     }).limit(10)
 }
 
-SchemaUserInfo.membersPageSession.resolveDiscordId = async function (id) {
+// Members page session management
+SchemaUserInfo.statics.membersPageSession = {}
+
+SchemaUserInfo.statics.membersPageSession.resolveDiscordId = async function (id) {
     return (await this.findOne({ id }).exec())?.associationMembership?.googleWorkspaceName
 }
 
-SchemaUserInfo.membersPageSession.getWithCode = async function (code) {
+SchemaUserInfo.statics.membersPageSession.getWithCode = async function (code) {
     return (await this.findOne({ membersPageSession: { code } }).exec())?.membersPageSession
 }
 
-SchemaUserInfo.membersPageSession.get = async function (googleWorkspaceName) {
+SchemaUserInfo.statics.membersPageSession.get = async function (googleWorkspaceName) {
     return (await this.findOne({ associationMembership: { googleWorkspaceName } }).exec())?.membersPageSession
 }
 
-SchemaUserInfo.membersPageSession.set = async function (googleWorkspaceName, code, timestamp) {
+SchemaUserInfo.statics.membersPageSession.set = async function (googleWorkspaceName, code, timestamp) {
     return this.findOneAndUpdate({ associationMembership: { googleWorkspaceName } }, {
         membersPageSession: {
             code,
