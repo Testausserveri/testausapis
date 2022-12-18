@@ -19,7 +19,7 @@ const router = Router()
 
 router.get("/", async (req, res) => {
     // Check authentication
-    const session = await database.UserInfo.membersPageSession.getWithCode(req.cookies.code)
+    const session = await database.UserInfo.membersPageSession.getWithCode(req.cookies?.code)
     // TODO: Redirect to login
     if (!session || !session.timestamp || !session.timestamp + sessionExpiry < new Date().getTime()) return res.status(400).send("Permission denied.")
 
