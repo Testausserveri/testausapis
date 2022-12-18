@@ -58,8 +58,8 @@ router.post(
             // Logged in with Discord. Resolve Discord userID to email
                 username = await database.UserInfo.resolveDiscordId(accountDetails?.id)
             } else if (accountDetails?.platform?.id === "fffe466b-f00a-4928-85e0-6b229bc368fe") {
-            // Logged in with Members login
-                if (accountDetails?.contact?.email === null) return res.status(400).send("Unable to access account email address.")
+                // Logged in with Members login
+                if (!accountDetails?.contact?.email) return res.status(400).send("Unable to access account email address.")
                 if (!accountDetails.contact.email.endsWith("@testausserveri.fi")) return res.status(401).send("Permission denied.");
                 [username] = accountDetails.contact.email.split("@")
             }

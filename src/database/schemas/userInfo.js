@@ -86,7 +86,7 @@ SchemaUserInfo.statics.autoComplete = async function (search) {
 // Members page session management
 
 SchemaUserInfo.statics.resolveDiscordId = async function (id) {
-    return (await SchemaUserInfo.statics.findOne({ id }).exec())?.associationMembership?.googleWorkspaceName
+    return (await this.findOne({ id }).exec())?.associationMembership?.googleWorkspaceName
 }
 
 SchemaUserInfo.statics.getWithSessionCode = async function (code) {
