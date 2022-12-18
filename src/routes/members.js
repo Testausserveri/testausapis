@@ -24,9 +24,7 @@ router.get("/", cookieParser(), async (req, res) => {
     const session = await database.UserInfo.getWithSessionCode(req.cookies?.code)
     if (!session || !session.membersPageSession || !session.membersPageSession.timestamp) return res.status(400).send("Permission denied.")
     if (session.membersPageSession.timestamp + sessionExpiry < new Date().getTime()) {
-        return res.status(307, {
-            Location: "testausserveri.fi?relog=1"
-        }).end()
+        return res.status(307).setHeader("Location", "testausserveri.fi?relog=1").end()
     }
 
     // Session is valid
