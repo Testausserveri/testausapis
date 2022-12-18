@@ -28,6 +28,10 @@ router.get("/", async (req, res) => {
     return res.status(200).send("Wow! You found the members page :O I am as surprised as you are, because I thought these didn't exist yet :p")
 })
 
+router.options("/login", cors({
+    allowedHeaders: ["Content-Type"]
+}))
+
 router.post(
     "/login", cors({
         allowedHeaders: ["Content-Type"]
