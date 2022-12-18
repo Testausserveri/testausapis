@@ -1,6 +1,7 @@
 import { randomBytes } from "crypto"
 import { Router, json } from "express"
 import cors from "cors"
+import cookieParser from "cookie-parser"
 import database from "../database/database.js"
 import request from "../utils/request.js"
 
@@ -18,7 +19,7 @@ function generateRandomString(size) {
 // eslint-disable-next-line new-cap
 const router = Router()
 
-router.get("/", async (req, res) => {
+router.get("/", cookieParser(), async (req, res) => {
     // Check authentication
     const session = await database.UserInfo.getWithSessionCode(req.cookies?.code)
     // TODO: Redirect to login
