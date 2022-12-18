@@ -1,8 +1,8 @@
 import { randomBytes } from "crypto"
 import { Router, json } from "express"
+import cors from "cors"
 import database from "../database/database.js"
 import request from "../utils/request.js"
-import cors from "cors"
 
 const sessionExpiry = 5 * 60 * 1000
 
@@ -28,49 +28,52 @@ router.get("/", async (req, res) => {
     return res.status(200).send("Wow! You found the members page :O I am as surprised as you are, because I thought these didn't exist yet :p")
 })
 
-router.post("/login", cors(), json(), async (req, res) => {
+router.post(
+    "/login", cors({
+        allowedHeaders: ["Content-Type"]
+    }), json(), async (req, res) => {
     // Verify access token exists and is valid
-    if (typeof req.body.token !== "string" || req.body.length < 1) return res.status(400).send("Missing or invalid token.")
+        if (typeof req.body.token !== "string" || req.body.length < 1) return res.status(400).send("Missing or invalid token.")
 
-    // Attempt to request the account info
-    const token = req.body.token.toString()
-    const accountDetailsRequest = await request(
+        // Attempt to request the account info
+        const token = req.body.token.toString()
+        const accountDetailsRequest = await request(
         // TODO: Make url configurable
-        "GET", "https://id.testausserveri.fi/api/v1/me", {
-            Authorization: `Bearer ${token}`
-        })
-    if (accountDetailsRequest.status !== 200) return res.status(401).send("Expired or invalid token.")
+            "GET", "https://id.testausserveri.fi/api/v1/me", {
+                Authorization: `Bearer ${token}`
+            })
+        if (accountDetailsRequest.status !== 200) return res.status(401).send("Expired or invalid token.")
 
-    // Make sure the correct method of login was used
-    try {
-        const accountDetails = JSON.parse(accountDetailsRequest.data)
+        // Make sure the correct method of login was used
+        try {
+            const accountDetails = JSON.parse(accountDetailsRequest.data)
 
-        let username = ""
+            let username = ""
 
-        if (accountDetails?.platform.id === "2db260c7-8ca9-42a3-8de8-a6a3c37be89e") {
+            if (accountDetails?.platform.id === "2db260c7-8ca9-42a3-8de8-a6a3c37be89e") {
             // Logged in with Discord. Resolve Discord userID to email
-            username = await database.UserInfo.resolveDiscordId(accountDetails?.id)
-        } else if (accountDetails?.platform?.id === "fffe466b-f00a-4928-85e0-6b229bc368fe") {
+                username = await database.UserInfo.resolveDiscordId(accountDetails?.id)
+            } else if (accountDetails?.platform?.id === "fffe466b-f00a-4928-85e0-6b229bc368fe") {
             // Logged in with Members login
-            if (accountDetails?.contact?.email === null) return res.status(400).send("Unable to access account email address.")
-            if (!accountDetails.contact.email.endsWith("@testausserveri.fi")) return res.status(401).send("Permission denied.");
-            [username] = accountDetails.contact.email.split("@")
-        }
+                if (accountDetails?.contact?.email === null) return res.status(400).send("Unable to access account email address.")
+                if (!accountDetails.contact.email.endsWith("@testausserveri.fi")) return res.status(401).send("Permission denied.");
+                [username] = accountDetails.contact.email.split("@")
+            }
 
-        // Do we have ongoing sessions
-        const membersPageSession = await database.UserInfo.getMembersPageSession(username)
-        let { code } = membersPageSession
-        if (membersPageSession.timestamp + sessionExpiry < new Date().getTime()) {
+            // Do we have ongoing sessions
+            const membersPageSession = await database.UserInfo.getMembersPageSession(username)
+            let { code } = membersPageSession
+            if (membersPageSession.timestamp + sessionExpiry < new Date().getTime()) {
             // We have a valid token, create a new one
-            code = generateRandomString(32)
-            await database.UserInfo.setMembersPageSession(username, code, new Date().getTime() + sessionExpiry)
-        }
+                code = generateRandomString(32)
+                await database.UserInfo.setMembersPageSession(username, code, new Date().getTime() + sessionExpiry)
+            }
 
-        // Return session token
-        res.setHeader("Set-Cookie", `code=${code}`)
-        res.setHeader("Content-Type", "text/html")
-        res.setHeader("Location", "/v1/members/")
-        return res.status(307).send(`
+            // Return session token
+            res.setHeader("Set-Cookie", `code=${code}`)
+            res.setHeader("Content-Type", "text/html")
+            res.setHeader("Location", "/v1/members/")
+            return res.status(307).send(`
             <header>
                 <title>Redirecting...</title>
             </header>
@@ -80,10 +83,11 @@ router.post("/login", cors(), json(), async (req, res) => {
                 <i>(/v1/members/)</i>
             </body>
         `)
-    } catch (e) {
-        console.error("Failed to authenticate member", e)
-        return res.status(500).send("Internal server error.")
+        } catch (e) {
+            console.error("Failed to authenticate member", e)
+            return res.status(500).send("Internal server error.")
+        }
     }
-})
+)
 
 export default router
