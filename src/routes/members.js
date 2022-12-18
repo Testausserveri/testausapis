@@ -74,19 +74,8 @@ router.post(
             }
 
             // Return session token
-            res.setHeader("Set-Cookie", `code=${code}`)
-            res.setHeader("Content-Type", "text/html")
-            res.setHeader("Location", "/v1/members/")
-            return res.status(307).send(`
-            <header>
-                <title>Redirecting...</title>
-            </header>
-            <body>
-                If you are not redirected, click <a href="/v1/members/">here</a>.
-                <br>
-                <i>(/v1/members/)</i>
-            </body>
-        `)
+            res.setHeader("Content-Type", "text/plain")
+            return res.status(200).send(code)
         } catch (e) {
             console.error("Failed to authenticate member", e)
             return res.status(500).send("Internal server error.")
