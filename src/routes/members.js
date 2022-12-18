@@ -22,11 +22,15 @@ const router = Router()
 router.get("/", cookieParser(), async (req, res) => {
     // Check authentication
     const session = await database.UserInfo.getWithSessionCode(req.cookies?.code)
-    // TODO: Redirect to login
-    if (!session || !session.timestamp || session.timestamp + sessionExpiry < new Date().getTime()) return res.status(400).send("Permission denied.")
+    if (!session || !session.membersPageSession || !session.membersPageSession.timestamp) return res.status(400).send("Permission denied.")
+    if (session.membersPageSession.timestamp + sessionExpiry < new Date().getTime()) {
+        return res.status(307, {
+            Location: "testausserveri.fi?relog=1"
+        }).end()
+    }
 
     // Session is valid
-    return res.status(200).send("Wow! You found the members page :O I am as surprised as you are, because I thought these didn't exist yet :p")
+    return res.status(200).send(`Wow! You found the members page :O You seem to be logged in as ${session.associationMembership.email}`)
 })
 
 router.options("/login", cors({

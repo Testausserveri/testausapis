@@ -90,7 +90,7 @@ SchemaUserInfo.statics.resolveDiscordId = async function (id) {
 }
 
 SchemaUserInfo.statics.getWithSessionCode = async function (code) {
-    return (await this.findOne({ "membersPageSession.code": code }).exec())?.membersPageSession
+    return this.findOne({ "membersPageSession.code": code }).exec()
 }
 
 SchemaUserInfo.statics.getMembersPageSession = async function (googleWorkspaceName) {
