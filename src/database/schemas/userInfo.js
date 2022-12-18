@@ -90,15 +90,15 @@ SchemaUserInfo.statics.resolveDiscordId = async function (id) {
 }
 
 SchemaUserInfo.statics.getWithSessionCode = async function (code) {
-    return (await this.findOne({ membersPageSession: { code } }).exec())?.membersPageSession
+    return (await this.findOne({ "membersPageSession.code": code }).exec())?.membersPageSession
 }
 
 SchemaUserInfo.statics.getMembersPageSession = async function (googleWorkspaceName) {
-    return (await this.findOne({ associationMembership: { googleWorkspaceName } }).exec())?.membersPageSession
+    return (await this.findOne({ "associationMembership.googleWorkspaceName": googleWorkspaceName }).exec())?.membersPageSession
 }
 
 SchemaUserInfo.statics.setMembersPageSession = async function (googleWorkspaceName, code, timestamp) {
-    return this.findOneAndUpdate({ associationMembership: { googleWorkspaceName } }, {
+    return this.findOneAndUpdate({ "associationMembership.googleWorkspaceName": googleWorkspaceName }, {
         membersPageSession: {
             code,
             timestamp
