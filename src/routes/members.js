@@ -2,6 +2,7 @@ import { randomBytes } from "crypto"
 import { Router, json } from "express"
 import database from "../database/database.js"
 import request from "../utils/request.js"
+import cors from "cors"
 
 const sessionExpiry = 5 * 60 * 1000
 
@@ -27,7 +28,7 @@ router.get("/", async (req, res) => {
     return res.status(200).send("Wow! You found the members page :O I am as surprised as you are, because I thought these didn't exist yet :p")
 })
 
-router.post("/login", json(), async (req, res) => {
+router.post("/login", cors(), json(), async (req, res) => {
     // Verify access token exists and is valid
     if (typeof req.body.token !== "string" || req.body.length < 1) return res.status(400).send("Missing or invalid token.")
 
