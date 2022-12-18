@@ -66,9 +66,9 @@ router.post(
 
             // Do we have ongoing sessions
             const membersPageSession = await database.UserInfo.getMembersPageSession(username)
-            let { code } = membersPageSession
-            if (membersPageSession.timestamp + sessionExpiry < new Date().getTime()) {
-            // We have a valid token, create a new one
+            let code = membersPageSession?.code
+            if ((membersPageSession?.timestamp ?? 0) + sessionExpiry < new Date().getTime()) {
+                // We have a expired token, create a new one
                 code = generateRandomString(32)
                 await database.UserInfo.setMembersPageSession(username, code, new Date().getTime() + sessionExpiry)
             }
