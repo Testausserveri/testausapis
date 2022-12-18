@@ -55,20 +55,22 @@ router.post(
 
             let username = ""
 
-            if (accountDetails?.platform.id === "2db260c7-8ca9-42a3-8de8-a6a3c37be89e") {
-            // Logged in with Discord. Resolve Discord userID to email
-                username = await database.UserInfo.resolveDiscordId(accountDetails?.id)
-            } else if (accountDetails?.platform?.id === "fffe466b-f00a-4928-85e0-6b229bc368fe") {
+            if (accountDetails.platform.id === "2db260c7-8ca9-42a3-8de8-a6a3c37be89e") {
+                // Logged in with Discord. Resolve Discord userID to email
+                username = await database.UserInfo.resolveDiscordId(accountDetails.id)
+            } else if (accountDetails.platform.id === "fffe466b-f00a-4928-85e0-6b229bc368fe") {
                 // Logged in with Members login
                 if (!accountDetails?.contact?.email) return res.status(400).send("Unable to access account email address.")
                 if (!accountDetails.contact.email.endsWith("@testausserveri.fi")) return res.status(401).send("Permission denied.");
                 [username] = accountDetails.contact.email.split("@")
             }
 
+            if (!username) return res.status(401).send("No such user")
+
             // Do we have ongoing sessions
             const membersPageSession = await database.UserInfo.getMembersPageSession(username)
             let code = membersPageSession?.code
-            if ((membersPageSession?.timestamp ?? 0) + sessionExpiry < new Date().getTime()) {
+            if (!code || (membersPageSession?.timestamp ?? 0) + sessionExpiry < new Date().getTime()) {
                 // We have a expired token, create a new one
                 code = generateRandomString(32)
                 await database.UserInfo.setMembersPageSession(username, code, new Date().getTime() + sessionExpiry)
