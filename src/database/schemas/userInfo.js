@@ -87,19 +87,19 @@ SchemaUserInfo.statics.autoComplete = async function (search) {
 SchemaUserInfo.statics.membersPageSession = {}
 
 SchemaUserInfo.statics.membersPageSession.resolveDiscordId = async function (id) {
-    return (await this.findOne({ id }).exec())?.associationMembership?.googleWorkspaceName
+    return (await SchemaUserInfo.findOne({ id }).exec())?.associationMembership?.googleWorkspaceName
 }
 
 SchemaUserInfo.statics.membersPageSession.getWithCode = async function (code) {
-    return (await this.findOne({ membersPageSession: { code } }).exec())?.membersPageSession
+    return (await SchemaUserInfo.findOne({ membersPageSession: { code } }).exec())?.membersPageSession
 }
 
 SchemaUserInfo.statics.membersPageSession.get = async function (googleWorkspaceName) {
-    return (await this.findOne({ associationMembership: { googleWorkspaceName } }).exec())?.membersPageSession
+    return (await SchemaUserInfo.findOne({ associationMembership: { googleWorkspaceName } }).exec())?.membersPageSession
 }
 
 SchemaUserInfo.statics.membersPageSession.set = async function (googleWorkspaceName, code, timestamp) {
-    return this.findOneAndUpdate({ associationMembership: { googleWorkspaceName } }, {
+    return SchemaUserInfo.findOneAndUpdate({ associationMembership: { googleWorkspaceName } }, {
         membersPageSession: {
             code,
             timestamp
