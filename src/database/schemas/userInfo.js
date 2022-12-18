@@ -84,21 +84,20 @@ SchemaUserInfo.statics.autoComplete = async function (search) {
 }
 
 // Members page session management
-SchemaUserInfo.statics.membersPageSession = {}
 
-SchemaUserInfo.statics.membersPageSession.resolveDiscordId = async function (id) {
+SchemaUserInfo.statics.resolveDiscordId = async function (id) {
     return (await SchemaUserInfo.statics.findOne({ id }).exec())?.associationMembership?.googleWorkspaceName
 }
 
-SchemaUserInfo.statics.membersPageSession.getWithCode = async function (code) {
-    return (await SchemaUserInfo.statics.findOne({ membersPageSession: { code } }).exec())?.membersPageSession
+SchemaUserInfo.statics.getWithSessionCode = async function (code) {
+    return (await this.findOne({ membersPageSession: { code } }).exec())?.membersPageSession
 }
 
-SchemaUserInfo.statics.membersPageSession.get = async function (googleWorkspaceName) {
-    return (await SchemaUserInfo.statics.findOne({ associationMembership: { googleWorkspaceName } }).exec())?.membersPageSession
+SchemaUserInfo.statics.getMembersPageSession = async function (googleWorkspaceName) {
+    return (await this.findOne({ associationMembership: { googleWorkspaceName } }).exec())?.membersPageSession
 }
 
-SchemaUserInfo.statics.membersPageSession.set = async function (googleWorkspaceName, code, timestamp) {
+SchemaUserInfo.statics.setMembersPageSession = async function (googleWorkspaceName, code, timestamp) {
     return SchemaUserInfo.findOneAndUpdate({ associationMembership: { googleWorkspaceName } }, {
         membersPageSession: {
             code,

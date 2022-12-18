@@ -19,7 +19,7 @@ const router = Router()
 
 router.get("/", async (req, res) => {
     // Check authentication
-    const session = await database.UserInfo.membersPageSession.getWithCode(req.cookies?.code)
+    const session = await database.UserInfo.getWithSessionCode(req.cookies?.code)
     // TODO: Redirect to login
     if (!session || !session.timestamp || !session.timestamp + sessionExpiry < new Date().getTime()) return res.status(400).send("Permission denied.")
 
@@ -48,7 +48,7 @@ router.post("/login", json(), async (req, res) => {
 
         if (accountDetails?.platform.id === "2db260c7-8ca9-42a3-8de8-a6a3c37be89e") {
             // Logged in with Discord. Resolve Discord userID to email
-            username = await database.UserInfo.membersPageSession.resolveDiscordId()
+            username = await database.UserInfo.resolveDiscordId(accountDetails?.id)
         } else if (accountDetails?.platform?.id === "fffe466b-f00a-4928-85e0-6b229bc368fe") {
             // Logged in with Members login
             if (accountDetails?.contact?.email === null) return res.status(400).send("Unable to access account email address.")
@@ -57,12 +57,12 @@ router.post("/login", json(), async (req, res) => {
         }
 
         // Do we have ongoing sessions
-        const membersPageSession = await database.UserInfo.membersPageSession.get(username)
+        const membersPageSession = await database.UserInfo.getMembersPageSession(username)
         let { code } = membersPageSession
         if (membersPageSession.timestamp + sessionExpiry < new Date().getTime()) {
             // We have a valid token, create a new one
             code = generateRandomString(32)
-            await database.UserInfo.membersPageSession.set(username, code, new Date().getTime() + sessionExpiry)
+            await database.UserInfo.setMembersPageSession(username, code, new Date().getTime() + sessionExpiry)
         }
 
         // Return session token
