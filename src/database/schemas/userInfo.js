@@ -98,7 +98,7 @@ SchemaUserInfo.statics.getMembersPageSession = async function (googleWorkspaceNa
 }
 
 SchemaUserInfo.statics.setMembersPageSession = async function (googleWorkspaceName, code, timestamp) {
-    return SchemaUserInfo.findOneAndUpdate({ associationMembership: { googleWorkspaceName } }, {
+    return this.findOneAndUpdate({ associationMembership: { googleWorkspaceName } }, {
         membersPageSession: {
             code,
             timestamp
