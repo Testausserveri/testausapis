@@ -28,7 +28,7 @@ router.get("/", cookieParser(), async (req, res) => {
     }
 
     // Session is valid
-    return res.status(200).send(`Wow! You found the members page :O You seem to be logged in as ${session.associationMembership.email}`)
+    return res.status(200).send(`Wow! You found the members page :O You seem to be logged in as ${session.associationMembership.googleWorkspaceName}`)
 })
 
 router.options("/login", cors({
