@@ -21,6 +21,8 @@ router.get("/", async (req, res) => {
 
     const results = await task
 
+    const links = req.query.links
+
     if (req.query.suggested) results.sort(() => 0.5 - Math.random())
 
     let data
@@ -28,7 +30,7 @@ router.get("/", async (req, res) => {
     if (req.query.slugs) {
         data = results.map((result) => result.slug)
     } else {
-        // Rearrange data to make it the most effective for a HTTP response
+        // Rearrange data to make it the most effective for an HTTP response
         data = results.map((result) => ({
             _id: result._id,
             description: result.description.short,
@@ -47,7 +49,8 @@ router.get("/", async (req, res) => {
                 return { type, filename }
             })(),
             name: result.name,
-            slug: result.slug
+            slug: result.slug,
+            ...(links && {links: result.links})
         }))
     }
 
