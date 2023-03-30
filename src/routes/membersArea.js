@@ -24,7 +24,7 @@ router.use(session({
         mongoUrl: process.env.TEST_CLUSTER ?? `mongodb://${process.env.MONGODB_HOST || "testausapis_mongo"}:27017/main`
     }),
     cookie: {
-        secure: process.env.NODE_ENV == "production",
+        secure: false,
         httpOnly: true,
         expires: expiryDate
     }
