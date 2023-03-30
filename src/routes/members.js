@@ -1,3 +1,13 @@
+/* eslint-disable import/first */
+// This is Eemil's membersArea backend, which is not yet in use.
+process.exit(1)
+//
+/*
+also the packages:
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+*/
+
 import { randomBytes } from "crypto"
 import { Router, json } from "express"
 import cors from "cors"

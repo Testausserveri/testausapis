@@ -8,10 +8,11 @@ import discordRoute from "./routes/discord.js"
 import githubRoute from "./routes/github.js"
 import projectsRoute from "./routes/projects.js"
 import miscRoute from "./routes/misc.js"
-import membersAreaRoute from "./routes/membersArea.js"
 
 // Eemil's membersArea backend, which is not yet in use.
 // import membersRoute from "./routes/members.js"
+
+import membersAreaRoute from "./routes/membersArea.js"
 
 /**
  * Database connection
