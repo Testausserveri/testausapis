@@ -56,9 +56,9 @@ const router = express.Router()
 router.use("/discord", discordRoute) // Eemilin legacy Discord-integraatiot
 router.use("/github", githubRoute)
 router.use("/projects", projectsRoute)
-router.use("/members", membersRoute)
+// router.use("/members", membersRoute) Eemilin WIP membersArea
 router.use("/", miscRoute)
-router.use("/", membersAreaRoute)
+router.use("/", membersAreaRoute) // production membersArea
 
 app.use("/v1", router)
 
