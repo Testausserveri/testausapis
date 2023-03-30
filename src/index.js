@@ -8,6 +8,7 @@ import discordRoute from "./routes/discord.js"
 import githubRoute from "./routes/github.js"
 import projectsRoute from "./routes/projects.js"
 import miscRoute from "./routes/misc.js"
+import membersAreaRoute from "./routes/membersArea.js"
 
 /**
  * Database connection
@@ -48,10 +49,11 @@ app.get("/", (_, res) => {
 // eslint-disable-next-line new-cap
 const router = express.Router()
 
-router.use("/discord", discordRoute)
+router.use("/discord", discordRoute) // Eemilin legacy Discord-integraatiot
 router.use("/github", githubRoute)
 router.use("/projects", projectsRoute)
 router.use("/", miscRoute)
+router.use("/", membersAreaRoute)
 
 app.use("/v1", router)
 
