@@ -13,7 +13,7 @@ const SchemaUserInfo = new Schema({
     username: String, // discord username
     nickname: String, // discord member nickname
     associationMembership: {
-        firstName: String, 
+        firstName: String,
         lastName: String,
         city: String,
         googleWorkspaceName: String,
@@ -25,11 +25,19 @@ const SchemaUserInfo = new Schema({
         handledIn: String,
         status: {
             type: String,
-            enum : [null, 'RECEIVED','MEMBER','PAST','REJECTED'],
+            enum: [null, "RECEIVED", "MEMBER", "PAST", "REJECTED"],
             default: null
-        },
+        }
     },
-    internalNotices: String,
+    membersPageSession: {
+        code: {
+            unique: true,
+            sparse: true,
+            type: String
+        },
+        timestamp: Number
+    },
+    internalNotices: String
 })
 
 /**
@@ -67,9 +75,35 @@ SchemaUserInfo.statics.getUserInfo = async function (id) {
 }
 
 SchemaUserInfo.statics.autoComplete = async function (search) {
-    return this.find({$or: [
-        {username: new RegExp(`${search}`, "i")},
-        {nickname: new RegExp(`${search}`, "i")}
-    ]}).limit(10)
+    return this.find({
+        $or: [
+            { username: new RegExp(`${search}`, "i") },
+            { nickname: new RegExp(`${search}`, "i") }
+        ]
+    }).limit(10)
 }
+
+// Members page session management
+
+SchemaUserInfo.statics.resolveDiscordId = async function (id) {
+    return (await this.findOne({ id }).exec())?.associationMembership?.googleWorkspaceName
+}
+
+SchemaUserInfo.statics.getWithSessionCode = async function (code) {
+    return this.findOne({ "membersPageSession.code": code }).exec()
+}
+
+SchemaUserInfo.statics.getMembersPageSession = async function (googleWorkspaceName) {
+    return (await this.findOne({ "associationMembership.googleWorkspaceName": googleWorkspaceName }).exec())?.membersPageSession
+}
+
+SchemaUserInfo.statics.setMembersPageSession = async function (googleWorkspaceName, code, timestamp) {
+    return this.findOneAndUpdate({ "associationMembership.googleWorkspaceName": googleWorkspaceName }, {
+        membersPageSession: {
+            code,
+            timestamp
+        }
+    }, { upsert: true }).exec()
+}
+
 export default SchemaUserInfo
