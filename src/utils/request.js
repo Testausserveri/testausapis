@@ -98,6 +98,8 @@ export default (
         }))
     })
 
+    request.on("error", (e) => reject(e))
+
     // Send headers
     if (headers !== undefined && Object.keys(headers).length !== 0) for (const header of Object.keys(headers)) request.setHeader(header, headers[header])
     if (options?.overrideContentLength) request.setHeader("Content-Length", options.overrideContentLength)
