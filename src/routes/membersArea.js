@@ -32,6 +32,7 @@ router.use(session({
 
 router.post("/authenticate", async (req, res, next) => {
     try {
+        console.log("debug: /authenticate")
         // get oauth token
         const params = new URLSearchParams({
             client_id: process.env.DISCORD_CLIENT_ID,
