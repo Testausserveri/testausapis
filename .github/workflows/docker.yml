@@ -37,3 +37,5 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           platforms: linux/amd64,linux/arm64
           tags: ghcr.io/testausserveri/testausapis
+          cache-from: type=registry,ref=testausserveri/testausapis:latest
+          cache-to: type=inline
