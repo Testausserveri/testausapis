@@ -33,15 +33,18 @@ router.use(session({
 router.post("/authenticate", async (req, res, next) => {
     try {
         // get oauth token
-        const response = await axios.post("https://discord.com/api/oauth2/token", new URLSearchParams({
+        const params = new URLSearchParams({
             client_id: process.env.DISCORD_CLIENT_ID,
             client_secret: process.env.DISCORD_SECRET,
             grant_type: "authorization_code",
             code: req.body.code,
             redirect_uri: process.env.COAL_REDIRECT_URI,
             scope: "identify email"
-        }))
+        })
+        console.log("debug: ", params)
+        const response = await axios.post("https://discord.com/api/oauth2/token", params)
 
+        console.log("debug: getting @me")
         // get discord user info
         const { data } = await axios.get("https://discord.com/api/users/@me", {
             headers: {
