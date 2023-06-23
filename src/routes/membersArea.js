@@ -43,7 +43,9 @@ router.post("/authenticate", async (req, res, next) => {
             scope: "identify email"
         })
         console.log("debug: ", params)
-        const response = await axios.post("https://discord.com/api/oauth2/token", params)
+        const response = await axios.post("https://discord.com/api/oauth2/token", params).catch((res) => {
+            console.log(res, res.response, res.message)
+        })
 
         console.log("debug: getting @me")
         // get discord user info
