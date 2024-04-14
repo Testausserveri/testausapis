@@ -7,6 +7,7 @@ import database from "./database/database.js"
 import discordRoute from "./routes/discord.js"
 import githubRoute from "./routes/github.js"
 import projectsRoute from "./routes/projects.js"
+import applyRoute from "./routes/apply.js"
 import miscRoute from "./routes/misc.js"
 
 // Eemil's membersArea backend, which is not yet in use.
@@ -56,6 +57,7 @@ const router = express.Router()
 router.use("/discord", discordRoute) // Eemilin legacy Discord-integraatiot
 router.use("/github", githubRoute)
 router.use("/projects", projectsRoute)
+router.use("/apply", applyRoute)
 // router.use("/members", membersRoute) Eemilin WIP membersArea
 router.use("/", miscRoute)
 router.use("/", membersAreaRoute) // production membersArea

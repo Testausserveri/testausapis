@@ -23,6 +23,7 @@ const SchemaUserInfo = new Schema({
             type: String
         },
         handledIn: String,
+        appliedAt: Date,
         status: {
             type: String,
             enum: [null, "RECEIVED", "MEMBER", "PAST", "REJECTED"],
