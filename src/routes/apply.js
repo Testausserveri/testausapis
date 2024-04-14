@@ -5,9 +5,9 @@ import database from "../database/database.js"
 const router = express.Router()
 
 router.get("/authorized", async (req, res) => {
+    res.setHeader("Content-Type", "text/html")
     try {
         function answerToOpener(data) {
-            res.setHeader("Content-Type", "text/html")
             res.end("<script>parent.opener.postMessage('" + JSON.stringify(data) + "', '" + process.env.COAL_APPLY_ORIGIN + "');window.close();</script>");
         }
         const code = req.query.code
