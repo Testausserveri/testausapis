@@ -84,7 +84,10 @@ router.post("/submit", async (req, res) => {
 
         // check if email address already belongs to an assoc member
         // if so, swap it to a random one (so that we don't give out info whether someone is a member or not)
-        const resultEmail = await database.UserInfo.findOne({ "associationMembership.email": email })
+        const resultEmail = await database.UserInfo.findOne({
+            "associationMembership.email": email,
+            "id": { $ne: id }
+        })
         if (resultEmail) {
             email = new Date().getTime() + '@testausapis-duplikaatti-email'
         }
