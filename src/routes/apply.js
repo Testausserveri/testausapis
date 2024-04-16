@@ -104,9 +104,20 @@ router.post("/submit", async (req, res) => {
                 status: "RECEIVED"
             }
         }, { upsert: true, new: true })
+        console.log(doc);
 
-        console.log(doc)
+        // give http response
         res.json({status: "ok"})
+
+        // invoke webhook
+        const webhookData = {
+            firstName,
+            lastName,
+            city,
+            email,
+            username,
+        }
+        await axios.post(process.env.APPLY_WEBHOOK, webhookData)
     } catch (e) {
         console.log(e)
         res.status(500).json({status: "error"})
