@@ -85,7 +85,7 @@ router.get("/authorized", async (req, res) => {
         })
     )
 
-    return res.redirect("https://testausserveri.fi/githubJoined")
+    return res.redirect("https://github.com/testausserveri")
 })
 
 export default router
