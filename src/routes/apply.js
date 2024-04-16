@@ -94,13 +94,14 @@ router.post("/submit", async (req, res) => {
         if (resultDiscord?.associationMembership.status == 'MEMBER') throw "dc already assoc member"
 
         // upsert application
+        const appliedAt = new Date();
         const doc = await database.UserInfo.findOneAndUpdate({ id }, {
             associationMembership: {
                 firstName,
                 lastName,
                 city,
                 email,
-                appliedAt: new Date(),
+                appliedAt,
                 status: "RECEIVED"
             }
         }, { upsert: true, new: true })
@@ -116,6 +117,7 @@ router.post("/submit", async (req, res) => {
             city,
             email,
             username,
+            appliedAt
         }
         await axios.post(process.env.APPLY_WEBHOOK, webhookData)
     } catch (e) {
