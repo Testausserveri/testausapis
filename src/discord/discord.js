@@ -112,6 +112,7 @@ async function init(database) {
                     }
                 } else if (interaction.commandName === "whois") {
                     const discordUserId = interaction.options.get("user").value
+                    console.log(interaction.user.id, " whoised user ", discordUserId)
                     const member = await database.UserInfo.findOne({ id: discordUserId }, "id")
                     if (!member) {
                         await interaction.reply({ content: "Jäsentä ei ole vielä rekisterissä. Yritä huomenna uudelleen.", ephemeral: true })
