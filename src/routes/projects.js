@@ -10,7 +10,7 @@ router.get("/", async (req, res) => {
     let task = database.Projects.find({ publishState: "PUBLISHED" }, req.query.slugs ? "slug" : null)
 
     if (!req.query.slugs) {
-        task = task.populate("members", "nickname username associationMembership.firstName associationMembership.lastName")
+        task = task.populate("members", "nickname username associationMembership.firstName associationMembership.lastName optoutPublicName")
             .populate("tags", "name")
     }
 
@@ -38,7 +38,7 @@ router.get("/", async (req, res) => {
                 _id, associationMembership, nickname, username
             }) => ({
                 _id,
-                name: associationMembership?.lastName ?
+                name: (associationMembership?.lastName && associationMembership?.optoutPublicName != true) ?
                     `${associationMembership.firstName} ${associationMembership.lastName[0]}.` :
                     (nickname || username)
             })),

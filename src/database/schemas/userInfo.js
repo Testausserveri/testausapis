@@ -38,6 +38,7 @@ const SchemaUserInfo = new Schema({
         },
         timestamp: Number
     },
+    optoutPublicName: Boolean,
     internalNotices: String
 })
 
