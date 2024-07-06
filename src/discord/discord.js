@@ -110,6 +110,14 @@ async function init(database) {
                                 .setURL(discordConnectionsURL))
                         await interaction.reply({ content: "Authorize access to your account by logging in with your Discord account.", components: [row], ephemeral: true })
                     }
+                } else if (interaction.commandName === "whois") {
+                    const discordUserId = interaction.options.get("user").value
+                    const member = await database.UserInfo.findOne({ id: discordUserId }, "id")
+                    if (!member) {
+                        await interaction.reply({ content: "Jäsentä ei ole vielä rekisterissä. Yritä huomenna uudelleen.", ephemeral: true })
+                        return 
+                    }
+                    await interaction.reply({ content: member._id.toString(), ephemeral: true })
                 }
             } catch (e) {
                 console.error("Failed to process application command", e)

@@ -61,5 +61,17 @@ export default [
                 ]
             }
         ]
+    },
+    {
+        name: "whois",
+        description: "Hae käyttäjän jäsentunniste",
+        options: [
+            {
+                type: 6,
+                name: "user",
+                description: "Käyttäjä",
+                required: true
+            }
+        ]
     }
 ]
