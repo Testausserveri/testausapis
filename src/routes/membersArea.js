@@ -101,6 +101,7 @@ router.get("/me", async (req, res, next) => {
         // maybe refactor this lol
         const { associationMembership } = member
 
+        /*
         res.json({
             username: member.username,
             _id: member._id,
@@ -110,6 +111,20 @@ router.get("/me", async (req, res, next) => {
                 city: associationMembership.city,
                 googleWorkspaceName: associationMembership.googleWorkspaceName,
                 email: associationMembership.email,
+                handledIn: associationMembership.handledIn,
+                status: associationMembership.status
+            }
+        })
+        */
+        res.json({
+            username: member.username,
+            _id: member._id,
+            associationMembership: {
+                firstName: `${member.username}'s firstName`,
+                lastName: `${member.username}'s lastName`,
+                city: `${member.username}'s city`,
+                googleWorkspaceName: `${member.username}'s googleWorkspaceName`,
+                email: `${member.username}'s email`,
                 handledIn: associationMembership.handledIn,
                 status: associationMembership.status
             }
