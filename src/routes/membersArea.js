@@ -26,7 +26,8 @@ router.use(session({
     cookie: {
         secure: false,
         httpOnly: true,
-        expires: expiryDate
+        expires: expiryDate,
+        ...(process.env.NODE_ENV !== "development" ? { domain: ".testausserveri.fi" } : {})
     }
 }))
 
