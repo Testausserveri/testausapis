@@ -36,7 +36,8 @@ const app = express()
 app.set("json spaces", 2)
 
 app.use((_, res, next) => { // Allow everyone for CORS
-    res.setHeader("Access-Control-Allow-Origin", "*")
+    res.setHeader("Access-Control-Allow-Origin", process.env.CORS_DOMAIN)
+    res.setHeader("Access-Control-Allow-Credentials", "true")
     next()
 })
 
