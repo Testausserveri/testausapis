@@ -1,7 +1,5 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable no-shadow */
-/* eslint-disable consistent-return */
+/* eslint-disable */
+
 import express, { Router } from "express"
 import axios from "axios"
 import session from "express-session"
@@ -76,6 +74,9 @@ router.post("/authenticate", async (req, res, next) => {
         req.session.regenerate((err) => {
             if (err) return next(err)
             req.session.memberId = member._id
+            req.session.discordId = data.id
+            req.session.username = data.username
+            req.session.discordAvatar = data.avatar
             req.session.save((err) => {
                 if (err) return next(err)
                 console.log("Authenticated successfully")
@@ -102,21 +103,26 @@ router.get("/me", async (req, res, next) => {
         // maybe refactor this lol
         const { associationMembership } = member
 
-        /*
         res.json({
             username: member.username,
             _id: member._id,
+            discord: {
+                avatar: req.session.discordAvatar,
+                id: req.session.discordId
+            },
             associationMembership: {
                 firstName: associationMembership.firstName,
                 lastName: associationMembership.lastName,
                 city: associationMembership.city,
                 googleWorkspaceName: associationMembership.googleWorkspaceName,
                 email: associationMembership.email,
+                acceptedAt: associationMembership.acceptedAt,
                 handledIn: associationMembership.handledIn,
                 status: associationMembership.status
             }
         })
-        */
+
+        /*
         res.json({
             username: member.username,
             _id: member._id,
@@ -129,9 +135,72 @@ router.get("/me", async (req, res, next) => {
                 handledIn: associationMembership.handledIn,
                 status: associationMembership.status
             }
-        })
+        }) */
     } catch (e) {
         next(e)
+    }
+})
+
+router.post("/apply", async (req, res) => {
+    try {
+        const id = req.session.discordId;
+        const username = req.session.username;
+
+        console.log("New assoc application ", username, req.body.email)
+
+        // extract the rest data from request
+        let { firstName, lastName, city, email } = req.body;
+        const fieldsMissing = firstName.trim().length == 0 || 
+            lastName.trim().length == 0 || 
+            city.trim().length == 0 || 
+            email.trim().length == 0 ||
+            !/^\S+@\S+$/.test(email);
+        if (fieldsMissing) throw "fields missing"
+
+        // check if email address already belongs to an assoc member
+        // if so, swap it to a random one (so that we don't give out info whether someone is a member or not)
+        const resultEmail = await database.UserInfo.findOne({
+            "associationMembership.email": email,
+            "id": { $ne: id }
+        })
+        if (resultEmail) {
+            email = new Date().getTime() + '@testausapis-duplikaatti-email'
+        }
+
+        // check if Discord member is already a member of the association
+        const resultDiscord = await database.UserInfo.getUserInfo(id)
+        if (resultDiscord?.associationMembership.status == 'MEMBER') throw "dc already assoc member"
+
+        // upsert application
+        const appliedAt = new Date();
+        const doc = await database.UserInfo.findOneAndUpdate({ id }, {
+            associationMembership: {
+                firstName,
+                lastName,
+                city,
+                email,
+                appliedAt,
+                status: "RECEIVED"
+            }
+        }, { upsert: true, new: true })
+        console.log(doc);
+
+        // give http response
+        res.json({status: "ok"})
+
+        // invoke webhook
+        const webhookData = {
+            firstName,
+            lastName,
+            city,
+            email,
+            username,
+            appliedAt
+        }
+        await axios.post(process.env.APPLY_WEBHOOK, webhookData)
+    } catch (e) {
+        console.log(e)
+        res.status(500).json({status: "error"})
     }
 })
 
@@ -139,6 +208,11 @@ router.get("/logout", async (req, res, next) => {
     try {
         req.session.destroy()
         console.log("User logged out")
+        if (req.query.state === "opener") {
+            res.setHeader("Content-Type", "text/html")
+            res.end("<script>parent.opener.postMessage('logout');window.close();</script>")
+            return
+        }
         res.redirect("/")
     } catch (e) {
         next(e)

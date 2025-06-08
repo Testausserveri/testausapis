@@ -35,9 +35,10 @@ const app = express()
 
 app.set("json spaces", 2)
 
-app.use((_, res, next) => { // Allow everyone for CORS
+app.use((_, res, next) => { 
     res.setHeader("Access-Control-Allow-Origin", process.env.CORS_DOMAIN)
     res.setHeader("Access-Control-Allow-Credentials", "true")
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept")
     next()
 })
 
@@ -58,7 +59,7 @@ const router = express.Router()
 router.use("/discord", discordRoute) // Eemilin legacy Discord-integraatiot
 router.use("/github", githubRoute)
 router.use("/projects", projectsRoute)
-router.use("/apply", applyRoute)
+// router.use("/apply", applyRoute)
 // router.use("/members", membersRoute) Eemilin WIP membersArea
 router.use("/", miscRoute)
 router.use("/", membersAreaRoute) // production membersArea
