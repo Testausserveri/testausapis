@@ -13,6 +13,13 @@ router.use(express.json())
 
 const expiryDate = new Date(Date.now() + 60 * 60 * 1000 * 48) // 48 h
 
+const requireAuth = (req, res, next) => {
+    if (!req.session.memberId) {
+        return res.status(403).json({ status: "error", message: "unauthenticated" })
+    }
+    next()
+}
+
 router.use(session({
     secret: process.env.SESSION_SECRET,
     saveUninitialized: false, // don't create session until something stored
@@ -88,10 +95,8 @@ router.post("/authenticate", async (req, res, next) => {
     }
 })
 
-router.get("/me", async (req, res, next) => {
+router.get("/me", requireAuth, async (req, res, next) => {
     try {
-        if (!req.session.memberId) return next(new Error("unauthenticated"))
-
         const member = await database.UserInfo.findOne({
             _id: req.session.memberId
         })
@@ -141,7 +146,7 @@ router.get("/me", async (req, res, next) => {
     }
 })
 
-router.post("/apply", async (req, res) => {
+router.post("/apply", requireAuth, async (req, res) => {
     try {
         const id = req.session.discordId;
         const username = req.session.username;
