@@ -103,12 +103,22 @@ router.get("/me", requireAuth, async (req, res, next) => {
 
         if (!member) return next(new Error("user not found from db"))
 
-        console.log(member)
-
-        // maybe refactor this lol
-        const { associationMembership } = member
-
-        res.json({
+        // Convert to plain object to ensure property access works properly
+        const associationMembership = member.associationMembership.toObject ? 
+            member.associationMembership.toObject() : 
+            member.associationMembership
+        
+        // Format acceptedAt date as dd.mm.yyyy
+        const formatDate = (date) => {
+            if (!date) return null
+            const d = new Date(date)
+            const day = d.getDate().toString()
+            const month = (d.getMonth() + 1).toString()
+            const year = d.getFullYear()
+            return `${day}.${month}.${year}`
+        }
+        
+        res.json({  
             username: member.username,
             _id: member._id,
             discord: {
@@ -121,7 +131,7 @@ router.get("/me", requireAuth, async (req, res, next) => {
                 city: associationMembership.city,
                 googleWorkspaceName: associationMembership.googleWorkspaceName,
                 email: associationMembership.email,
-                acceptedAt: associationMembership.acceptedAt,
+                acceptedAt: formatDate(associationMembership.acceptedAt),
                 handledIn: associationMembership.handledIn,
                 status: associationMembership.status
             }
