@@ -209,6 +209,57 @@ router.post("/apply", requireAuth, async (req, res) => {
     }
 })
 
+router.patch("/me", requireAuth, async (req, res, next) => {
+    try {
+        const { city, email } = req.body;
+        
+        console.log("Updating member", req.session.memberId, req.body)
+        
+        // Validate lengths
+        if (city && city.length > 50) {
+            return res.status(400).json({ status: "error", message: "city too long" });
+        }
+        if (email && email.length > 50) {
+            return res.status(400).json({ status: "error", message: "email too long" });
+        }
+        
+        // Validate email format if provided
+        if (email && !/^\S+@\S+$/.test(email)) {
+            return res.status(400).json({ status: "error", message: "invalid email format" });
+        }
+
+        // Check if email is already taken by another member
+        if (email) {
+            const existingMember = await database.UserInfo.findOne({
+                "associationMembership.email": email,
+                _id: { $ne: req.session.memberId }
+            });
+            if (existingMember) {
+                return res.status(400).json({ status: "error", message: "email already in use" });
+            }
+        }
+
+        // Update the member's information
+        const updateData = {};
+        if (city) updateData["associationMembership.city"] = city;
+        if (email) updateData["associationMembership.email"] = email;
+
+        const member = await database.UserInfo.findOneAndUpdate(
+            { _id: req.session.memberId },
+            { $set: updateData },
+            { new: true }
+        );
+
+        if (!member) {
+            return res.status(404).json({ status: "error", message: "member not found" });
+        }
+
+        res.json({ status: "ok" });
+    } catch (e) {
+        next(e);
+    }
+});
+
 router.get("/logout", async (req, res, next) => {
     try {
         req.session.destroy()

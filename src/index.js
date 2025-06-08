@@ -39,6 +39,7 @@ app.use((_, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", process.env.CORS_DOMAIN)
     res.setHeader("Access-Control-Allow-Credentials", "true")
     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept")
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, OPTIONS")
     next()
 })
 
