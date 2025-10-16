@@ -11,7 +11,7 @@ const router = Router()
 
 router.use(express.json())
 
-const expiryDate = new Date(Date.now() + 60 * 60 * 1000 * 48) // 48 h
+const maxAge = 60 * 60 * 1000 * 48 // 48 h
 
 const requireAuth = (req, res, next) => {
     if (!req.session.memberId) {
@@ -31,7 +31,7 @@ router.use(session({
     cookie: {
         secure: false,
         httpOnly: true,
-        expires: expiryDate,
+        maxAge: maxAge,
         ...(process.env.NODE_ENV !== "development" ? { domain: ".testausserveri.fi" } : {})
     }
 }))
