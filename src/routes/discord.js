@@ -38,6 +38,7 @@ async function getMessagesLeaderboard() {
 async function updateGuildInfoCache() {
     try {
         const config = await database.DataCollectionConfiguration.getDataCollectionConfig(mainServer) // We'll keep this here
+        // what the *** is this code -m 2025
         const data = await Promise.all([
             database.MessageCount.getMessageCount(mainServer),
             discordUtility.getMemberCount(mainServer),
@@ -45,7 +46,8 @@ async function updateGuildInfoCache() {
             database.DataCollectionConfiguration.getDataCollectionConfig(mainServer),
             discordUtility.getBoostStatus(mainServer, config?.allowed ?? []),
             getCodingLeaderboard(),
-            getMessagesLeaderboard()
+            getMessagesLeaderboard(),
+            database.UserInfo.getAssociationMembershipCount()
         ])
 
         guildInfoCache = {
@@ -55,6 +57,7 @@ async function updateGuildInfoCache() {
             premium: data[4] ?? { subscriptions: "N/A", trier: "N/A", subscribers: [] },
             codingLeaderboard: data[5],
             messagesLeaderboard: data[6],
+            associationMembershipCount: data[7] ?? "N/A",
             timestamp: new Date().getTime()
         }
     } catch (e) {

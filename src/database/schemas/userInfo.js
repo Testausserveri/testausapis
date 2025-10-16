@@ -76,6 +76,14 @@ SchemaUserInfo.statics.getUserInfo = async function (id) {
     return this.findOne({ id }).exec()
 }
 
+/**
+ * Get the number of association members
+ * @returns {Promise<number>}
+ */
+SchemaUserInfo.statics.getAssociationMembershipCount = async function () {
+    return this.countDocuments({ "associationMembership.status": "MEMBER" }).exec()
+}
+
 SchemaUserInfo.statics.autoComplete = async function (search) {
     return this.find({
         $or: [
