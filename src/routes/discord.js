@@ -38,7 +38,6 @@ async function getMessagesLeaderboard() {
 async function updateGuildInfoCache() {
     try {
         const config = await database.DataCollectionConfiguration.getDataCollectionConfig(mainServer) // We'll keep this here
-        // what the *** is this code -m 2025
         const data = await Promise.all([
             database.MessageCount.getMessageCount(mainServer),
             discordUtility.getMemberCount(mainServer),
