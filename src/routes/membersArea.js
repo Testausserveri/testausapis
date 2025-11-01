@@ -270,6 +270,55 @@ router.patch("/me", requireAuth, async (req, res, next) => {
     }
 });
 
+router.get("/banking", requireAuth, async (req, res, next) => {
+    try {
+        const member = await database.UserInfo.findOne({ _id: req.session.memberId }, "associationMembership.status")
+        if (!member || member?.associationMembership?.status !== "MEMBER") {
+            return res.status(403).json({ status: "error", message: "forbidden" })
+        }
+
+        const [latestBalance, transactions, whitelist] = await Promise.all([
+            database.BankBalance.findOne({}).sort({ date: -1 }),
+            database.BankTransaction.find({}).sort({ booking_date: -1 }),
+            database.BankPublicWhitelist.find({})
+        ])
+
+        const rulesByName = new Map()
+        for (const doc of whitelist) {
+            rulesByName.set(doc.name, doc.rules || {})
+        }
+
+        const maskedTransactions = []
+        for (const tx of transactions) {
+            const rules = rulesByName.get(tx.name)
+            if (rules && rules.hidden === true) continue
+
+            const name = rules && rules.name === true ? tx.name : null
+            const remittanceInformation = rules && rules.remittance_information === true ? tx.remittance_information : null
+
+            maskedTransactions.push({
+                credit_debit_indicator: tx.credit_debit_indicator,
+                currency: tx.currency,
+                amount: tx.amount ? parseFloat(tx.amount) : null,
+                id: tx._id,
+                name,
+                date: tx.booking_date,
+                remittance_information: remittanceInformation
+            })
+        }
+
+        res.json({
+            balance: latestBalance ? {
+                date: latestBalance.created_at,
+                amount: latestBalance.amount ? parseFloat(latestBalance.amount) : null
+            } : null,
+            transactions: maskedTransactions
+        })
+    } catch (e) {
+        next(e)
+    }
+})
+
 router.get("/logout", async (req, res, next) => {
     try {
         req.session.destroy()

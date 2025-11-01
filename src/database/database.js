@@ -5,6 +5,9 @@ import SchemaMessageCount from "./schemas/messageCount.js"
 import SchemaProjects from "./schemas/projects.js"
 import SchemaUserInfo from "./schemas/userInfo.js"
 import SchemaTag from "./schemas/tag.js"
+import SchemaBankTransaction from "./schemas/bankTransaction.js"
+import SchemaBankBalance from "./schemas/bankBalance.js"
+import SchemaBankPublicWhitelist from "./schemas/bankPublicWhitelist.js"
 
 const { connect, connection, model } = mongoose
 
@@ -36,6 +39,19 @@ const models = {
     SchemaTag: model(
         "Tag",
         SchemaTag
+    )
+    ,
+    BankTransaction: model(
+        "BankTransaction",
+        SchemaBankTransaction
+    ),
+    BankBalance: model(
+        "BankBalance",
+        SchemaBankBalance
+    ),
+    BankPublicWhitelist: model(
+        "BankPublicWhitelist",
+        SchemaBankPublicWhitelist
     )
 }
 
