@@ -287,7 +287,7 @@ router.get("/banking", requireAuth, async (req, res, next) => {
         }
 
         const [latestBalance, transactions, whitelist] = await Promise.all([
-            database.BankBalance.findOne({}).sort({ date: -1 }),
+            database.BankBalance.findOne({}).sort({ created_at: -1 }),
             database.BankTransaction.find({}).sort({ booking_date: -1 }),
             database.BankPublicWhitelist.find({})
         ])
