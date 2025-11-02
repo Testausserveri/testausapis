@@ -36,6 +36,15 @@ router.use(session({
     }
 }))
 
+function isValidMigrationQuery(email, migrationKey) {
+    return (
+        typeof email === "string" &&
+        typeof migrationKey === "string" &&
+        email.length > 0 &&
+        /^[A-Za-z0-9]{128}$/.test(migrationKey)
+    )
+}
+
 router.post("/authenticate", async (req, res, next) => {
     try {
         console.log("debug: /authenticate")
@@ -329,6 +338,59 @@ router.get("/logout", async (req, res, next) => {
             return
         }
         res.redirect("/")
+    } catch (e) {
+        next(e)
+    }
+})
+
+router.get("/migrate", async (req, res, next) => {
+    try {
+        const { email, migrationKey } = req.query
+        if (!isValidMigrationQuery(email, migrationKey)) {
+            return res.status(400).json({ status: "error", message: "invalid query params" })
+        }
+
+        const doc = await database.UserInfo.findOne({
+            "associationMembership.email": email,
+            "associationMembership.migrationKey": migrationKey
+        }, "associationMembership.firstName associationMembership.lastName")
+
+        if (!doc) return res.status(404).json({ status: "not_found" })
+
+        return res.json({
+            firstName: doc.associationMembership?.firstName ?? null,
+            lastName: doc.associationMembership?.lastName ?? null
+        })
+    } catch (e) {
+        next(e)
+    }
+})
+
+router.post("/migrate", requireAuth, async (req, res, next) => {
+    try {
+        const { email, migrationKey } = req.query
+        if (!isValidMigrationQuery(email, migrationKey)) {
+            return res.status(400).json({ status: "error", message: "invalid query params" })
+        }
+
+        const discordId = req.session.discordId
+        if (!discordId) return res.status(403).json({ status: "error", message: "unauthenticated" })
+
+        // Remove the current document that holds this Discord id
+        await database.UserInfo.findOneAndDelete({ id: discordId })
+
+        // Assign the Discord id to the association member document
+        const updated = await database.UserInfo.findOneAndUpdate({
+            "associationMembership.email": email,
+            "associationMembership.migrationKey": migrationKey
+        }, {
+            $set: { id: discordId },
+            $unset: { "associationMembership.migrationKey": "" }
+        }, { new: true })
+
+        if (!updated) return res.status(404).json({ status: "not_found" })
+
+        return res.json({ status: "ok" })
     } catch (e) {
         next(e)
     }
