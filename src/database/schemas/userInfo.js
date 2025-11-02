@@ -22,6 +22,7 @@ const SchemaUserInfo = new Schema({
             sparse: true,
             type: String
         },
+        migrationKey: String,
         handledIn: String,
         appliedAt: Date,
         status: {
