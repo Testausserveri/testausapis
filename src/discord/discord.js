@@ -3,7 +3,7 @@
  */
 
 import {
-    Intents, Client, MessageActionRow, MessageButton
+    Client, GatewayIntentBits, ActionRowBuilder, ButtonBuilder, ButtonStyle
 } from "discord.js"
 import { inspect } from "util"
 import request from "../utils/request.js"
@@ -14,11 +14,15 @@ const address = process.env.DEBUGGING ? "http://localhost:8080" : "https://api.t
 const discordConnectionsURL = `${address}/v1/discord/connections/authorize`
 
 // Client configuration
-const intents = new Intents()
-intents.add(
-    Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_PRESENCES, Intents.FLAGS.GUILD_INTEGRATIONS
-)
-const client = new Client({ intents })
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildPresences,
+        GatewayIntentBits.GuildIntegrations
+    ]
+})
 
 // Globals
 global.discordDetectable = {}
@@ -103,9 +107,9 @@ async function init(database) {
                             ephemeral: true
                         })
                     } else if (interaction.options.getSubcommand() === "connections") {
-                        const row = new MessageActionRow()
-                            .addComponents(new MessageButton()
-                                .setStyle("LINK")
+                        const row = new ActionRowBuilder()
+                            .addComponents(new ButtonBuilder()
+                                .setStyle(ButtonStyle.Link)
                                 .setLabel("Login with Discord")
                                 .setURL(discordConnectionsURL))
                         await interaction.reply({ content: "Authorize access to your account by logging in with your Discord account.", components: [row], ephemeral: true })
@@ -142,7 +146,7 @@ async function init(database) {
     })
 
     const utilities = new DiscordUtility(database, client)
-    client.once("ready", async () => {
+    client.once("clientReady", async () => {
         // for await (const guild of client.guilds.cache) {
         // await guild[1].commands.set(slashCommands)
         // }

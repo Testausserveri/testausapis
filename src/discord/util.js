@@ -33,12 +33,9 @@ class DiscordUtility extends EventEmitter {
      * @returns {Promise<string | null>}
      */
     async getOnlineCount(id) {
-        try {
-            const guild = await this.client.guilds.fetch(id, { withCounts: true, cache: true })
-            if (typeof guild?.approximatePresenceCount === "number") return guild.approximatePresenceCount
-        } catch {
-        }
-        return null
+        const guild = await this.client.guilds.fetch(id)
+        const presences = guild.members.cache.filter((member) => member.presence?.status !== undefined).size;
+        return presences;
     }
 
     /**
@@ -111,7 +108,7 @@ class DiscordUtility extends EventEmitter {
                         emoji: activity.emoji ? ({
                             animated: activity.emoji.animated,
                             name: activity.emoji.name,
-                            url: activity.emoji.url
+                            url: activity.emoji.imageURL()
                         }) : null,
                         name: activity.name,
                         details: activity.details,

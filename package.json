@@ -1,6 +1,6 @@
 {
   "name": "testausapis",
-  "version": "1.9.1",
+  "version": "1.9.2",
   "description": "",
   "main": "src/index.js",
   "type": "module",
@@ -26,7 +26,8 @@
     "express-session": "^1.17.3",
     "mariadb": "^3.0.0",
     "memory-cache": "^0.2.0",
-    "mongoose": "^6.0.15"
+    "mongoose": "^6.0.15",
+    "resend": "^6.4.0"
   },
   "devDependencies": {
     "csv-parser": "^3.0.0",
