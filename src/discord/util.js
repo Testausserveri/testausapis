@@ -47,8 +47,16 @@ class DiscordUtility extends EventEmitter {
     async getBoostStatus(id, fetchOnlyThese) {
         const guild = await this.client.guilds.fetch(id)
         return guild !== null ? {
-            subscriptions: guild.premiumSubscriptionCount,
-            tier: guild.premiumTier.includes("_") ? parseInt(guild.premiumTier.split("_")[1], 10) : 0,
+            subscriptions: guild.premiumSubscriptionCount ?? 0,
+            tier: (() => {
+                const rawTier = guild.premiumTier
+                if (typeof rawTier === "number") return rawTier
+                if (typeof rawTier === "string") {
+                    const match = rawTier.match(/TIER_(\d+)/)
+                    return match ? parseInt(match[1], 10) : 0
+                }
+                return 0
+            })(),
             subscribers: (await guild.members.fetch())
                 .filter((member) => member.premiumSince !== null)
                 .map((member) => (!fetchOnlyThese.includes(member.id) ?
