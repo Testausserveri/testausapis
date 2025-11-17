@@ -18,7 +18,7 @@ testauskoiraDatabase.connect()
 
 let discordUtility // The Discord utility class
 
-const liveCacheTTL = 5000
+const liveCacheTTL = 15000
 let guildInfoCache = null
 
 /**
