@@ -33,10 +33,12 @@ class DiscordUtility extends EventEmitter {
      * @returns {Promise<string | null>}
      */
     async getOnlineCount(id) {
-        return (await this.client.guilds.fetch(id)).approximatePresenceCount ??
-                // Legacy way of getting the data, if the above fails
-                (await (await this.client.guilds.fetch(id)).members.fetch({ withPresences: true }))
-                    .filter((member) => member.user.bot === false && typeof member?.presence?.status === "string" && member?.presence?.status !== "offline").size
+        try {
+            const guild = await this.client.guilds.fetch(id, { withCounts: true, cache: true })
+            if (typeof guild?.approximatePresenceCount === "number") return guild.approximatePresenceCount
+        } catch {
+        }
+        return null
     }
 
     /**
