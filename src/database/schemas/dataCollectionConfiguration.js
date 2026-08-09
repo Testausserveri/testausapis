@@ -24,8 +24,12 @@ SchemaDataCollectionConfiguration.statics.updateDataCollectionPolicy = async fun
         id: serverId,
         allowed: config?.allowed ?? []
     }
-    if (mode === "remove") template.allowed.splice(template.allowed.indexOf(userId), 1)
-    else if (mode === "add") template.allowed.push(userId)
+    if (mode === "remove") {
+        const userIndex = template.allowed.indexOf(userId)
+        if (userIndex !== -1) template.allowed.splice(userIndex, 1)
+    } else if (mode === "add" && !template.allowed.includes(userId)) {
+        template.allowed.push(userId)
+    }
     cache.dataCollectionPolicies[serverId] = template
     return this.findOneAndUpdate({ id: serverId }, template, { upsert: true })
 }
